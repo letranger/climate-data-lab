@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第四課：用機器學習預測趨勢｜氣候資料實驗室</title>
+<link rel="icon" href="assets/logo-dayofai.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Rubik:wght@500;700&display=swap">
+<link rel="stylesheet" href="style.css?v=20261011171038">
+</head>
+<body>
+
+<header class="topbar">
+  <a class="brand" href="index.html">
+    <img src="assets/logo-dayofai.png" alt="Day of AI" class="logo">
+    <div><div class="brand-title">氣候資料實驗室</div><div class="brand-sub">第四課：用機器學習預測趨勢</div></div>
+  </a>
+  <nav class="lesson-nav" id="lessonNav" data-current="4"></nav>
+  <div class="pills"><span class="pill" id="studentName"></span><span class="pill" id="datasetPill" hidden></span></div>
+</header>
+
+<nav class="pipeline" id="pipeline"></nav>
+
+<main>
+
+<!-- ───────── 匯入與散布圖 ───────── -->
+<section class="panel" data-panel="1">
+  <h1>先看散布圖 <small>約 10 分鐘</small></h1>
+  <p class="lead">先匯入資料：和第三課一樣，上傳你在第二課存下來的 CSV。</p>
+  <div id="loader"></div>
+  <h2>再看一次資料的散布圖</h2>
+  <p>從機器學習的角度看資料時，散布圖特別好用：它把每一筆資料都畫成一個獨立的點，就像機器學習模型看資料的方式一樣。按「畫出來」，把三個欄位的散布圖畫出來。</p>
+  <div class="sc3" id="sc3"></div>
+  <div class="stop" data-slides="P62–P63"><ul><li>等老師介紹下一段（線性迴歸）再繼續。</li></ul></div>
+  <div class="nav-row"><span></span><button class="btn next" data-goto="2">下一步：線性迴歸 ▶</button></div>
+</section>
+
+<!-- ───────── 線性迴歸 ───────── -->
+<section class="panel" data-panel="2">
+  <h1>線性迴歸 <small>約 15 分鐘</small></h1>
+  <p class="lead">第一種預測模型是<b>線性迴歸</b>，它會：</p>
+  <ol>
+    <li>看散布圖上所有的資料點，</li>
+    <li>找出一個最能代表資料關係的直線方程式（叫做<b>最佳擬合線</b>），</li>
+    <li>把這條線畫出來。</li>
+  </ol>
+  <p>有了這條線的方程式，就能預測未來：在 x 軸上找到你想知道的年份，看看最佳擬合線在那一年對應的 y 是多少。不是所有資料都適合用直線表示，但適合的時候，這是一個簡單又有效率的預測方法。</p>
+  <div class="callout"><b>依序做：</b>①替欄位 1 畫出最佳擬合線 → ②再替欄位 2、欄位 3 也畫出來 → ③勾選「預測未來 5 年」，把未來的預測畫成虛線。左邊的清單會自動打勾。</div>
+  <div id="linBuilder"></div>
+  <div class="stop" data-slides="P64–P67" data-ws="作業9"><ul><li>試試看：在 x 軸上找到一個年份，看最佳擬合線在那一年的 y 是多少。（用上面的「試試看」）</li><li>哪些資料可能適合用線性迴歸來預測？</li></ul></div>
+  <div class="stop compact" data-slides="P68"><ul><li>做到這裡先停下來，等老師介紹支援向量迴歸。</li></ul></div>
+  <div class="nav-row"><button class="btn ghost" data-goto="1">◀ 上一步</button><button class="btn next" data-goto="3">下一步：支援向量迴歸 ▶</button></div>
+</section>
+
+<!-- ───────── SVR ───────── -->
+<section class="panel" data-panel="3">
+  <h1>支援向量迴歸 <small>約 20 分鐘</small></h1>
+  <div class="stop compact" data-slides="P69"><ul><li>哪些資料可能很難用線性迴歸來預測？</li></ul></div>
+  <p class="lead">SVR 和線性迴歸一樣，要找一個最能貼合資料的方程式。不同的是，SVR 找的不是直線，而是<b>最佳擬合曲線</b>。</p>
+  <p>所以曲線看起來會更貼近原本的資料。但它不一定要通過每一個點，曲線和資料點之間可以有一點誤差。這不是壞事：真實世界的資料常常亂亂的，留一點「彈性空間」，曲線反而比較能<b>泛化</b>，也就是對沒看過的新資料也預測得好。</p>
+  <details class="howto"><summary>為什麼 SVR 要先把資料「標準化」？</summary>
+    <p>用年份來預測時，電腦會把 1990 當成一千九百九十這個大數字，但每一筆資料之間其實只差 1 年。數值（Y）也一樣，可能很大，但每一年之間的差距相對很小。</p>
+    <p>所以 SVR 會先把年份和數值都換成「平均 0、標準差 1」的數字再學，畫圖前再換回原本的單位。圖下方有按鈕可以看標準化後的數字。</p>
+  </details>
+  <div class="callout"><b>依序做：</b>①替欄位 1 畫出最佳擬合曲線 → ②再替欄位 2 畫出來 → ③用曲線預測未來 5 年 → ④替欄位 3 畫出來並預測未來 5 年。</div>
+  <div id="svrBuilder"></div>
+  <div class="stop" data-slides="P70–P74">
+    <ul>
+      <li>你的 SVR 有好好代表你的資料嗎？你猜為什麼有、或為什麼沒有？</li>
+      <li>這些預測告訴你什麼？你相信它們嗎？</li>
+      <li>曲線貼合得太緊（過度擬合）會怎樣？什麼叫「泛化能力好」？</li>
+    </ul>
+  </div>
+  <div class="nav-row"><button class="btn ghost" data-goto="2">◀ 上一步</button><button class="btn next" data-goto="4">下一步：儲存與分享 ▶</button></div>
+</section>
+
+<!-- ───────── 分享 ───────── -->
+<section class="panel" data-panel="4">
+  <h1>儲存你的預測，和夥伴分享 <small>約 10 分鐘</small></h1>
+  <p class="lead">做得好！記得把你最喜歡的預測圖存下來（每張圖下方都有「存成圖片」）。接下來是資料分析和機器學習裡非常重要的一步：<b>說出你學到了什麼</b>。</p>
+  <div class="stop" data-slides="P75–P77" data-ws="作業9">
+    <ul>
+      <li>我的預測符合我原本的預期嗎？一開始我有任何預期嗎？</li>
+      <li>我的預測令人困惑嗎？是什麼讓它令人困惑？</li>
+      <li>我的預測有沒有讓我對研究的資料有新的理解？</li>
+      <li>我的預測對世界代表什麼？它實際上預測會發生什麼事？</li>
+      <li>預測的事一定會發生嗎？為什麼？</li>
+      <li>我比較喜歡哪一種預測：最佳擬合線，還是 SVR？為什麼？</li>
+      <li>你相信這些預測模型嗎？為什麼？</li>
+    </ul>
+  </div>
+  <div id="notes"></div>
+  <div class="nav-row"><button class="btn ghost" data-goto="3">◀ 上一步</button><a class="btn next" href="lesson5.html">前往第五課 ▶</a></div>
+  <p class="muted tiny" style="text-align:right"><button class="btn small ghost" id="resetAll">清除第四課的進度，重新開始</button></p>
+</section>
+
+</main>
+
+<footer class="footer">
+  本工具改編自麻省理工學院 Day of AI™「Telling Climate Stories with Data」的資料分析活動，依
+  <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a> 授權。
+  <a href="https://www.dayofai.org/privacy-and-terms-of-use" target="_blank" rel="noopener">使用條款</a>｜資料來源：World Bank Climate Change Indicators（via HDX）。所有運算都在你的瀏覽器中進行。
+</footer>
+<div class="toast" id="toast"></div>
+
+<script src="lib/chart.umd.min.js?v=20261011171038"></script>
+<script src="data/indicators-zh.js?v=20261011171038"></script>
+<script src="js/example-data.js?v=20261011171038"></script>
+<script src="js/core.js?v=20261011171038"></script>
+<script src="js/wide.js?v=20261011171038"></script>
+<script src="js/ml.js?v=20261011171038"></script>
+<script src="js/lesson4.js?v=20261011171038"></script>
+</body>
+</html>

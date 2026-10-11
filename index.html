@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>氣候資料實驗室</title>
+<link rel="icon" href="assets/logo-dayofai.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Rubik:wght@500;700&display=swap">
+<link rel="stylesheet" href="style.css?v=20261011171038">
+</head>
+<body class="home">
+
+<header class="topbar">
+  <a class="brand" href="index.html">
+    <img src="assets/logo-dayofai.png" alt="Day of AI" class="logo">
+    <div><div class="brand-title">氣候資料實驗室</div><div class="brand-sub">用數據講述氣候故事｜不用寫程式，也能走完資料分析流程</div></div>
+  </a>
+  <nav class="lesson-nav" id="lessonNav" data-current="0"></nav>
+  <div class="pills"><span class="pill" id="studentName"></span></div>
+</header>
+
+<main>
+  <section class="hero">
+    <h1>選一課開始</h1>
+    <p class="lead">原本的課程要寫 Python 程式來分析氣候資料。這個網站把第二～五課的活動都變成點選和拖拉，不會寫程式也能做，步驟和順序跟原課程一樣。</p>
+    <div class="toolbar"><label>你的名字 <input type="text" id="nameInput" placeholder="例如：王小明"></label><span class="tbd" title="待小組討論後決定">待討論</span><span class="muted tiny">（只存在這台電腦，會一直顯示在畫面右上角，點一下就能改；下載筆記時也會帶上）</span></div>
+  </section>
+
+  <div class="lesson-grid">
+    <a class="lesson-card" href="lesson2.html" data-stage="explore">
+      <div class="lc-num">第 2 課</div>
+      <h2>探索資料</h2>
+      <p>認識 CSV 和資料表，自己到 HDX 下載巴西的氣候資料，整理成資料表，處理缺失資料，選出三個想研究的欄位。</p>
+      <div class="lc-files"><span>需要：自己下載的 <code>climate-change_bra.csv</code></span><span>產出：<code>my_brazil_climate_data.csv</code></span></div>
+      <div class="lc-prog" data-lesson="2"></div>
+    </a>
+    <a class="lesson-card" href="lesson3.html" data-stage="viz">
+      <div class="lc-num">第 3 課</div>
+      <h2>將資料視覺化</h2>
+      <p>上傳第二課的資料，畫折線圖、散布圖，學會正規化，換背景、顏色和標題。</p>
+      <div class="lc-files"><span>需要：第二課的 <code>my_brazil_climate_data.csv</code></span><span>產出：圖表、筆記</span></div>
+      <div class="lc-prog" data-lesson="3"></div>
+    </a>
+    <a class="lesson-card" href="lesson4.html" data-stage="ml">
+      <div class="lc-num">第 4 課</div>
+      <h2>用機器學習預測趨勢</h2>
+      <p>用線性迴歸找最佳擬合線、用支援向量迴歸（SVR）找最佳擬合曲線，預測未來 5 年。</p>
+      <div class="lc-files"><span>需要：第二課的 <code>my_brazil_climate_data.csv</code></span><span>產出：預測圖、筆記</span></div>
+      <div class="lc-prog" data-lesson="4"></div>
+    </a>
+    <a class="lesson-card" href="lesson5.html" data-stage="story">
+      <div class="lc-num">第 5 課</div>
+      <h2>獨立資料分析專題</h2>
+      <p>自己挑一個國家，下載它的資料，把第二～四課的方法全部用一次，準備第六課要說的氣候故事。</p>
+      <div class="lc-files"><span>需要：自己下載的 <code>climate-change_xxx.csv</code></span><span>產出：<code>my_xxx_climate_data.csv</code>、圖表、筆記</span></div>
+      <div class="lc-prog" data-lesson="5"></div>
+    </a>
+  </div>
+
+  <img class="shot pipeline-img" src="assets/img/pipeline.png" alt="資料分析流程：資料探索 → 資料視覺化 → 機器學習 → 資料敘事">
+
+  <details class="howto">
+    <summary>給老師：使用方式與注意事項</summary>
+    <ul>
+      <li><b>直接打開</b>：雙擊 <code>index.html</code> 就能用，不需要安裝任何東西；也可以把整個資料夾放上任何靜態網站空間。</li>
+      <li><b>資料怎麼來</b>：和原課程一樣，第二課、第五課要學生自己到 HDX 下載 CSV 再上傳，網站不內建任何國家的資料。第三、四課上傳的是第二課存下的檔案；檔案不見的學生，可以下載原課程附的範例檔 <code>ex_brazil_climate_data.csv</code>。</li>
+      <li><b>進度</b>：每一課的進度各自存在學生的瀏覽器裡（localStorage），關掉再打開會接著做。換電腦或用無痕視窗就不會保留。</li>
+      <li><b>HDX 新版資料</b>：世界銀行在 2025 年更新後，新下載的檔案已經沒有 CO2、甲烷、溫室氣體總排放量等欄位，第一列也沒有 <code>#country+name</code> 標籤列。網站會自動處理，並在第二課提醒學生。</li>
+      <li><b>和寫程式有關的部分</b>（複製 Notebook、執行程式格、填寫程式碼、匯入函式庫等）已省略，或改成點選、拖拉、勾選等類似的動作。</li>
+      <li><b>原課程沒有的功能</b>都標成「延伸」：散布圖的 X 軸換成另一個欄位、SVR 調參數、考試模式、預測超過 5 年。</li>
+    </ul>
+  </details>
+</main>
+
+<footer class="footer">
+  本工具改編自麻省理工學院 Day of AI™「Telling Climate Stories with Data」的資料分析活動，依
+  <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a> 授權。
+  <a href="https://www.dayofai.org/privacy-and-terms-of-use" target="_blank" rel="noopener">使用條款</a>｜資料來源：World Bank Climate Change Indicators（via HDX）。所有運算都在你的瀏覽器中進行。
+</footer>
+<div class="toast" id="toast"></div>
+
+<script src="lib/chart.umd.min.js?v=20261011171038"></script>
+<script src="js/core.js?v=20261011171038"></script>
+<script>
+(() => {
+  CDL.initPage();
+  const nm = document.getElementById("nameInput");
+  nm.value = CDL.getName();
+  nm.addEventListener("input", () => CDL.setName(nm.value.trim()));
+  // 每一課的進度摘要
+  const steps = { 2: 10, 3: 5, 4: 4, 5: 7 };
+  document.querySelectorAll(".lc-prog").forEach(el => {
+    const n = el.dataset.lesson, s = CDL.makeStore(`cdl-lesson${n}`).load();
+    el.textContent = s && s.step ? `上次做到第 ${s.step} 步（共 ${steps[n]} 步）` : "";   // 讀不到（例如 Firefox 開本機檔案）就不顯示，免得誤導
+  });
+})();
+</script>
+</body>
+</html>

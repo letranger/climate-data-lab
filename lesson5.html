@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第五課：獨立資料分析專題｜氣候資料實驗室</title>
+<link rel="icon" href="assets/logo-dayofai.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Rubik:wght@500;700&display=swap">
+<link rel="stylesheet" href="style.css?v=20261011171038">
+</head>
+<body>
+
+<header class="topbar">
+  <a class="brand" href="index.html">
+    <img src="assets/logo-dayofai.png" alt="Day of AI" class="logo">
+    <div><div class="brand-title">氣候資料實驗室</div><div class="brand-sub">第五課：獨立資料分析專題</div></div>
+  </a>
+  <nav class="lesson-nav" id="lessonNav" data-current="5"></nav>
+  <div class="pills"><span class="pill" id="studentName"></span><span class="pill" id="datasetPill" hidden></span></div>
+</header>
+
+<nav class="pipeline" id="pipeline"></nav>
+
+<main>
+
+<!-- ───────── 選國家 ───────── -->
+<section class="panel" data-panel="1">
+  <h1>決定你要研究的國家 <small>約 5 分鐘</small></h1>
+  <p class="lead">這一課你要探索<b>自己的資料</b>，做的事和前幾課一樣，只是提示比較少。卡住的時候，回去看第二～四課，通常就能找到下一步的線索。</p>
+  <p>前三課都用巴西，這次鼓勵你挑一個新的國家：可以是你住的國家、家人來自的國家，或你很想去旅行的國家。</p>
+
+  <div class="card">
+    <h3>找到並下載你的國家的資料</h3>
+    <p>每個國家在 HDX 上都有自己的資料頁。輸入國家的英文名稱，按「產生連結」，再點連結到 HDX 下載：</p>
+    <div class="toolbar"><label>國家英文名稱 <input type="text" id="countryIn" placeholder="例如 Japan、Viet Nam、Philippines"></label><button class="btn small" id="mkLink">產生連結</button></div>
+    <div id="countryLink" class="link-out"></div>
+    <ul class="muted">
+      <li>網址的格式是 <code>https://data.humdata.org/dataset/world-bank-climate-change-indicators-for-國名</code>，國名用世界銀行的英文寫法，全部小寫、空白換成連字號，例如 <code>japan</code>、<code>viet-nam</code>、<code>philippines</code>、<code>indonesia</code>；南韓是 <code>korea-rep</code>。</li>
+      <li>如果連結打不開，就到 <a href="https://data.humdata.org/" target="_blank" rel="noopener">HDX 首頁</a>搜尋「Climate Change Indicators」加國名，選 <b>World Bank Group</b> 提供的「<b>國名 - Climate Change</b>」那一筆（下圖以日本為例）。</li>
+      <li>進到國家的資料頁後，往下捲到 <b>Data and resources</b>，在 <b>Climate Change Indicators for 國名</b> 那一格按右下角藍色的 <b>Download</b>。檔名會像 <code>climate-change_abc.csv</code>，abc 是國家代碼。</li>
+      <li>世界銀行的資料庫裡沒有台灣，想研究台灣的同學可以改選氣候條件相近的國家，例如日本、菲律賓。</li>
+    </ul>
+    <div class="shot-tbd"><span class="tbd" title="待小組討論後決定">待討論</span></div>
+    <img class="shot" src="assets/img/hdx-search-japan.png" alt="在 HDX 搜尋 Climate Change Indicators japan 的結果，第一筆是 World Bank Group 的 Japan - Climate Change">
+    <p class="muted tiny shot-cap">① 在 HDX 搜尋，點進 World Bank Group 的「國名 - Climate Change」（上圖以日本為例）</p>
+    <img class="shot" src="assets/img/hdx-download.png" alt="國家資料頁的 Data and resources 區塊，Climate Change Indicators 右下角的藍色 Download 按鈕">
+    <p class="muted tiny shot-cap">② 在國家的資料頁往下捲到 Data and resources，按右下角藍色的 Download（上圖以巴西為例）</p>
+  </div>
+
+  <h2>上傳你的國家的 CSV</h2>
+  <div id="upload"></div>
+  <div class="stop" data-slides="P82" data-ws="作業10"><ul><li>你選了哪個國家？為什麼？寫在學習單上。</li></ul></div>
+  <div class="nav-row"><span></span><button class="btn next" data-goto="2">下一步：整理資料 ▶</button></div>
+</section>
+
+<!-- ───────── 整理 ───────── -->
+<section class="panel" data-panel="2">
+  <h1>把資料整理成資料表 <small>約 5 分鐘</small></h1>
+  <p class="lead">和第二課一樣：刪掉標籤列、刪掉用不到的欄位、重新排成「一年一列」，再把缺失 60% 以上的欄位刪掉。忘了為什麼要這樣做，可以回去看第二課。</p>
+  <div id="reformat"></div>
+  <h2>刪掉缺失 60% 以上的欄位</h2>
+  <div id="missing"></div>
+  <div class="nav-row"><button class="btn ghost" data-goto="1">◀ 上一步</button><button class="btn next" data-goto="3">下一步：選欄位 ▶</button></div>
+</section>
+
+<!-- ───────── 選欄位 ───────── -->
+<section class="panel" data-panel="3">
+  <h1>選出三個有趣的欄位 <small>約 15 分鐘</small></h1>
+  <p class="lead">先列出所有欄位，點進去看看資料（也可以只看某幾年），挑一個最有興趣的當「欄位 1」。接著再挑兩個：可以直接挑你有感覺的，也可以像第二課一樣看相關係數。</p>
+  <p class="muted">記得：有些欄位和你的欄位高度相關，只是因為它們量的是同一件或很像的事。盡量挑量的是<b>不同</b>東西、但彼此相關的欄位。</p>
+  <div id="pick"></div>
+  <h2>你選的三個欄位</h2>
+  <div class="interest-print"></div>
+  <div class="stop" data-slides="P83" data-ws="作業10"><ul><li>你選了哪三個欄位？為什麼？寫在學習單上。</li></ul></div>
+  <div class="nav-row"><button class="btn ghost" data-goto="2">◀ 上一步</button><button class="btn next" data-goto="4">下一步：清理資料框 ▶</button></div>
+</section>
+
+<!-- ───────── 清理 ───────── -->
+<section class="panel" data-panel="4">
+  <h1>清理你的資料 <small>約 10 分鐘</small></h1>
+  <p class="lead">只留下你選的三個欄位，再刪掉任何有空白的年份。步驟和第二課一樣。</p>
+  <div id="clean"></div>
+  <div class="stop" data-slides="P84–P85" data-ws="作業10">
+    <ul>
+      <li>分享你為什麼選這個國家。</li>
+      <li>你有興趣研究什麼？你為什麼選這些資料欄位？</li>
+      <li>你認為可能會發現什麼？</li>
+    </ul>
+  </div>
+  <div class="nav-row"><button class="btn ghost" data-goto="3">◀ 上一步</button><button class="btn next" data-goto="5">下一步：自由探索 ▶</button></div>
+</section>
+
+<!-- ───────── 自由探索 ───────── -->
+<section class="panel" data-panel="5">
+  <h1>自由探索 <small>約 20 分鐘</small></h1>
+  <p class="lead">先看看你整理好的整個資料框，也可以只看某些欄位、某幾年（第二課教過的方法）。然後用第三課學到的折線圖、散布圖，試試不同的顏色和圖表類型，找出最能呈現你感興趣的資料的畫法。</p>
+  <div id="viewer" class="card"></div>
+  <h2>畫圖</h2>
+  <div id="vizBuilder"></div>
+  <div class="stop" data-slides="P86" data-ws="作業11"><ul><li>在資料框中查看你的資料，把資料畫成折線圖和散布圖。你看到了什麼？記在學習單上。</li></ul></div>
+  <div class="nav-row"><button class="btn ghost" data-goto="4">◀ 上一步</button><button class="btn next" data-goto="6">下一步：延伸：預測模型 ▶</button></div>
+</section>
+
+<!-- ───────── 延伸：預測 ───────── -->
+<section class="panel" data-panel="6">
+  <h1>延伸：預測模型 <small>約 15 分鐘</small></h1>
+  <p class="lead">想要的話，可以拿預測模型來試試看；如果你比較想把時間花在做要分享的圖表，也可以跳過這一步。</p>
+  <p>先替你的三個欄位都做<b>線性迴歸</b>，再做<b>支援向量迴歸</b>，做法和第四課一樣。別忘了 SVR 要先標準化，預測完再換回原本的單位（這裡會自動幫你做）。</p>
+  <div id="mlBuilder"></div>
+  <div class="stop" data-slides="P87"><ul><li>評估你的迴歸模型：它們有好好代表你的資料嗎？你猜為什麼有、或為什麼沒有？</li><li>這些預測告訴你什麼？你相信它們嗎？為什麼？</li></ul></div>
+  <div class="nav-row"><button class="btn ghost" data-goto="5">◀ 上一步</button><button class="btn next" data-goto="7">下一步：分享探索成果 ▶</button></div>
+</section>
+
+<!-- ───────── 分享 ───────── -->
+<section class="panel" data-panel="7">
+  <h1>分享你的探索成果 <small>約 10 分鐘</small></h1>
+  <p class="lead">做得好！找一位同學，分享你對資料的初步想法和問題。第六課要用這些成果來說故事，記得把整理好的資料、圖表和筆記存下來。</p>
+  <div class="stop" data-slides="P88" data-ws="作業11">
+    <ul>
+      <li>你探索的資料中，有沒有令人困惑或出乎意料的地方？</li>
+      <li>你的探索結果符合你原本的假設嗎（如果有的話）？</li>
+      <li>你從探索中學到了什麼？</li>
+      <li>有沒有發現什麼有趣、但很難解釋的模式？有沒有你無法解釋的資料？</li>
+      <li>資料的哪個部分最讓你想繼續探索？</li>
+    </ul>
+  </div>
+  <div class="takeaway-grid">
+    <div class="card"><h3>📄 整理好的資料</h3><p>第六課可以再用，也可以用 Excel 打開。</p><button class="btn primary" id="dlClean">下載 CSV</button></div>
+    <div class="card"><h3>📈 我的圖表</h3><p>在「自由探索」「延伸：預測」的每張圖下方按「存成圖片」，就能貼進簡報或影片。</p></div>
+    <div id="notes"></div>
+  </div>
+  <div class="nav-row"><button class="btn ghost" data-goto="6">◀ 上一步</button><a class="btn next" href="index.html">回首頁</a></div>
+  <p class="muted tiny" style="text-align:right"><button class="btn small ghost" id="resetAll">清除第五課的進度，重新開始</button></p>
+</section>
+
+</main>
+
+<footer class="footer">
+  本工具改編自麻省理工學院 Day of AI™「Telling Climate Stories with Data」的資料分析活動，依
+  <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a> 授權。
+  <a href="https://www.dayofai.org/privacy-and-terms-of-use" target="_blank" rel="noopener">使用條款</a>｜資料來源：World Bank Climate Change Indicators（via HDX）。所有運算都在你的瀏覽器中進行。
+</footer>
+<div class="toast" id="toast"></div>
+
+<script src="lib/chart.umd.min.js?v=20261011171038"></script>
+<script src="data/indicators-zh.js?v=20261011171038"></script>
+<script src="js/core.js?v=20261011171038"></script>
+<script src="js/explore.js?v=20261011171038"></script>
+<script src="js/wide.js?v=20261011171038"></script>
+<script src="js/viz.js?v=20261011171038"></script>
+<script src="js/ml.js?v=20261011171038"></script>
+<script src="js/lesson5.js?v=20261011171038"></script>
+</body>
+</html>

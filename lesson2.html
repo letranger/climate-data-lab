@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第二課：探索資料｜氣候資料實驗室</title>
+<link rel="icon" href="assets/logo-dayofai.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Rubik:wght@500;700&display=swap">
+<link rel="stylesheet" href="style.css?v=20261011171038">
+</head>
+<body>
+
+<header class="topbar">
+  <a class="brand" href="index.html">
+    <img src="assets/logo-dayofai.png" alt="Day of AI" class="logo">
+    <div><div class="brand-title">氣候資料實驗室</div><div class="brand-sub">第二課：探索資料</div></div>
+  </a>
+  <nav class="lesson-nav" id="lessonNav" data-current="2"></nav>
+  <div class="pills"><span class="pill" id="studentName"></span><span class="pill" id="datasetPill" hidden></span></div>
+</header>
+
+<nav class="pipeline" id="pipeline"></nav>
+
+<main>
+
+<!-- ───────── 開始 ───────── -->
+<section class="panel" data-panel="1">
+  <h1>開始 <small>約 5 分鐘</small></h1>
+  <p class="lead">這一課要練習資料分析的第一步：<b>資料探索</b>。你會自己下載巴西的氣候資料，把它整理成好讀的表格，處理缺失的資料，最後選出三個你想研究的項目。全部用點選、拖拉就能完成，不用寫程式。</p>
+  <img class="shot pipeline-img" src="assets/img/pipeline.png" alt="資料分析流程：資料探索 → 資料視覺化 → 機器學習 → 資料敘事">
+  <div class="card" id="nameCard" hidden>
+    <h3>先輸入你的名字 <span class="tbd" title="待小組討論後決定">待討論</span></h3>
+    <p>名字會一直顯示在畫面右上角，點一下就能改；之後下載的筆記也會帶上你的名字。</p>
+    <div class="toolbar"><label>你的名字 <input type="text" id="nameInput" placeholder="例如：王小明"></label></div>
+  </div>
+  <div class="nav-row"><span></span><button class="btn next" data-goto="2">下一步：什麼是 CSV ▶</button></div>
+</section>
+
+<!-- ───────── 什麼是 CSV ───────── -->
+<section class="panel" data-panel="2">
+  <h1>步驟 1　什麼是 CSV？ <small>約 5 分鐘</small></h1>
+  <p class="lead">CSV 是 comma-separated values（逗號分隔值）的縮寫。它是一種非常簡單、非常常見的檔案格式，用來儲存和分享資料，資料量很大的時候特別好用。</p>
+  <p>一個很小的 CSV 檔案，打開來其實就是這樣的文字，每一行是一筆資料，用逗號隔開：</p>
+  <pre class="code-ro csv-raw">Name,Age,Favorite Food
+Ada Lovelace,36,Hot Dogs
+Grace Hopper,85,Strawberries
+Alan Turing,41,Cheese Sandwich</pre>
+  <button class="btn primary" id="showCsv" type="button">用試算表的樣子看 ▶</button>
+  <div id="csvTableWrap" hidden>
+    <p>你可以把 CSV 想成簡化版的試算表；事實上，Excel 和 Google 試算表都能直接打開 CSV：</p>
+    <div class="table-wrap small" id="csvTable"></div>
+    <p>今天要用的氣候資料 CSV 大得多，有時候甚至有上百萬列。想像一下要捲動那麼大的試算表！資料太多的時候，科學家會改用程式（或像這個網頁這樣的工具）來處理。</p>
+  </div>
+  <div class="stop" data-slides="P27–P28" data-ws="作業5"><ul><li>你會在試算表中查看什麼類型的資料？</li><li>你會使用程式（或工具）查看什麼類型的資料？</li></ul></div>
+  <div class="nav-row"><button class="btn ghost" data-goto="1">◀ 上一步</button><button class="btn next" data-goto="3">下一步：下載巴西的資料 ▶</button></div>
+</section>
+
+<!-- ───────── 下載資料 ───────── -->
+<section class="panel" data-panel="3">
+  <h1>步驟 2　下載巴西的氣候資料 <small>約 5 分鐘</small></h1>
+  <p class="lead">今天要用聯合國人道資料交換平台（HDX）的資料。HDX 在 2014 年上線，是一個開放平台，上面有大量和人道危機、全球議題有關的資料，由聯合國人道事務協調廳（OCHA）的人道資料中心管理。</p>
+  <p>之後的課程，你可以自己挑一個國家的資料。現在先完成資料分析流程的第一步「取得資料」：<b>自己去下載巴西的氣候變遷資料</b>。</p>
+
+  <div class="card">
+    <h3>為什麼選巴西？</h3>
+    <ul>
+      <li>巴西是生物多樣性的熱點，亞馬遜雨林常被稱為「地球之肺」，能吸收二氧化碳、製造氧氣。它對全世界都很重要，也直接受到氣候變遷影響。</li>
+      <li>氣候變遷對巴西原住民的影響特別大，他們的生計和文化傳統都和環境緊緊相連。</li>
+      <li>巴西是牛肉、黃豆等糧食的全球主要供應國，農業既造成氣候變遷，也受到氣候變遷影響。</li>
+      <li>巴西會遇到各式各樣的極端天氣，從乾旱到洪水都有。</li>
+    </ul>
+  </div>
+
+  <div class="card" style="margin-top:1rem">
+    <h3>怎麼下載</h3>
+    <ol>
+      <li>打開 <a href="https://data.humdata.org/dataset/world-bank-climate-change-indicators-for-brazil" target="_blank" rel="noopener">https://data.humdata.org/dataset/world-bank-climate-change-indicators-for-brazil</a>（會開新分頁）。</li>
+      <li>往下捲到 <b>Data and resources</b>，在 <b>Climate Change Indicators for Brazil</b> 那一格，按右下角藍色的 <b>Download</b>。</li>
+      <li>下載好的檔案應該叫做 <code>climate-change_bra.csv</code>。</li>
+      <li>回到這裡，把檔案拖進下面的框框上傳。</li>
+    </ol>
+    <div class="shot-tbd"><span class="tbd" title="待小組討論後決定">待討論</span></div>
+    <img class="shot" src="assets/img/hdx-download.png" alt="HDX 頁面的 Data and resources 區塊，Climate Change Indicators 右下角的藍色 Download 按鈕">
+  </div>
+
+  <h2>上傳你下載的檔案</h2>
+  <div id="upload"></div>
+  <p class="muted tiny">檔案只會在你的瀏覽器裡處理，不會上傳到任何伺服器。世界銀行在 2025 年更新資料後，新下載的檔案已經沒有「二氧化碳排放量」「甲烷排放量」等排放欄位，投影片裡用到這些欄位的例子，看投影片上的數字討論即可。</p>
+  <div class="stop compact" data-slides="P26"><ul><li>上傳好就先停下來，等老師說明下一步。這個檔案總共有幾列？每一列記了些什麼？</li></ul></div>
+  <div class="nav-row"><button class="btn ghost" data-goto="2">◀ 上一步</button><button class="btn next" data-goto="4">下一步：怎麼看資料表 ▶</button></div>
+</section>
+
+<!-- ───────── 怎麼看資料表 ───────── -->
+<section class="panel" data-panel="4">
+  <h1>步驟 3　怎麼看一張資料表 <small>約 10 分鐘</small></h1>
+  <p class="lead">你剛上傳的巴西資料是一張有<b>欄</b>（直的）、有<b>列</b>（橫的）的表格。它有一千多列，資料量太大，一次全部攤開反而看不清楚，所以這裡先只看<b>前 100 列</b>。</p>
+  <p>資料很多時，我們常常只想看其中一部分。按下面的按鈕，看看每一種看法會留下哪些資料。</p>
+  <div class="foods">
+    <div class="foods-btns" id="foodBtns"></div>
+    <div class="foods-out"><div class="mini-title" id="foodInfo"></div><div class="table-wrap" id="foodTable"></div></div>
+  </div>
+  <div class="callout"><b>整理一下：</b>看資料表時，可以挑<b>欄</b>（只看某些項目），也可以挑<b>列</b>（只看某幾筆）。列的編號從 0 開始，所以第一列是 0。</div>
+  <div class="stop" data-slides="P29–P30"><ul><li>你可以對像這樣的資料表做哪些操作？</li><li>什麼時候你會只想看某幾欄？什麼時候只想看某幾列？</li></ul></div>
+  <div class="nav-row"><button class="btn ghost" data-goto="3">◀ 上一步</button><button class="btn next" data-goto="5">下一步：整理氣候資料 ▶</button></div>
+</section>
+
+<!-- ───────── 整理資料表 ───────── -->
+<section class="panel" data-panel="5">
+  <h1>步驟 3　把巴西的資料整理成資料表 <small>約 5 分鐘</small></h1>
+  <p class="lead">上一步你看到，原始檔一列只有一個數字，想看「某個指標這幾十年怎麼變」很困難。這一步要把它整理成「一年一列、一個指標一欄」的表格。</p>
+  <div id="reformat"></div>
+  <div class="stop compact" data-slides="P31"><ul><li>整理好先停在這裡，還不要進「處理缺失」。整理前是幾列？整理後變成幾年 × 幾個指標？</li></ul></div>
+  <div class="nav-row"><button class="btn ghost" data-goto="4">◀ 上一步</button><button class="btn next" data-goto="6">下一步：處理缺失資料 ▶</button></div>
+</section>
+
+<!-- ───────── 缺失資料 ───────── -->
+<section class="panel" data-panel="6">
+  <h1>步驟 3　刪掉缺太多資料的欄位 <small>約 5 分鐘</small></h1>
+  <p class="lead">空白的資料沒辦法幫我們理解巴西的氣候變遷，所以先做一點資料清理：刪掉<b>缺失比例 60% 以上</b>的欄位。缺很多資料的欄位雖然也有資訊，但很難從裡面看出規律或趨勢。刪之前，先看看每一欄是哪幾年有資料，以及刪掉之後表格還剩什麼。</p>
+  <div id="missing"></div>
+  <div class="stop" data-slides="P32–P33" data-ws="作業5"><ul><li>我們如何知道資料是否缺失？資料缺失可能代表什麼？</li><li>缺失資料可能會在資料分析流程的後續階段造成哪些問題？</li></ul></div>
+  <div class="nav-row"><button class="btn ghost" data-goto="5">◀ 上一步</button><button class="btn next" data-goto="7">下一步：選一個欄位來探索 ▶</button></div>
+</section>
+
+<!-- ───────── 選第一個欄位 ───────── -->
+<section class="panel" data-panel="7">
+  <h1>步驟 4　熟悉氣候資料：選一個欄位 <small>約 5 分鐘</small></h1>
+  <p class="lead">現在每一欄都至少有一些資料了。花幾分鐘一欄一欄看，挑<b>一個</b>你最想深入了解的，放進「欄位 1」。</p>
+  <p class="muted">右邊的資料只列出有數字的年份。有些欄位早年沒有資料，這不用擔心；如果空白太多讓你很困擾，可以請老師推薦別的欄位。</p>
+  <div id="pick1"></div>
+  <div class="stop" data-slides="P34" data-ws="作業6"><ul><li>你選了哪個欄位？為什麼？寫在學習單上，再繼續選另外兩個欄位。</li></ul></div>
+  <div class="nav-row"><button class="btn ghost" data-goto="6">◀ 上一步</button><button class="btn next" data-goto="8">下一步：再選兩個欄位 ▶</button></div>
+</section>
+
+<!-- ───────── 選另外兩個欄位 ───────── -->
+<section class="panel" data-panel="8">
+  <h1>步驟 4　再選兩個相關的欄位 <small>約 10 分鐘</small></h1>
+  <p class="lead">有了第一個欄位，接著找和它有關的欄位。其中一個方法是看<b>相關係數</b>：它幫每一對欄位算出一個介於 −1 到 1 的數字。數字越接近 1 或 −1，兩欄的關係越強；正數是一起變大，負數是一個變大另一個變小。</p>
+  <div id="pick3"></div>
+  <h2>你選的三個欄位</h2>
+  <p class="muted">繼續之前，先讓老師看過。</p>
+  <div class="interest-print"></div>
+  <div class="stop" data-slides="P35–P40" data-ws="作業6">
+    <ul>
+      <li>為什麼可能會想把兩、三種資料畫在同一張圖上？</li>
+      <li>相關性高的欄位放在一起比較有趣，還是相關性低的？相關性有可能高到不適合嗎？（提示：森林面積的兩個欄位）</li>
+      <li>甲烷排放量與溫室氣體總排放量的相關性會高還是低？人口可用電力比例與再生能源消耗量呢？先猜，再看投影片上的數字。</li>
+    </ul>
+  </div>
+  <div class="stop" data-slides="P41" data-ws="作業6"><ul><li>和夥伴或小組分享你選的欄位：為什麼選這些欄位？</li><li>你預期會看到哪些模式？為什麼？</li><li>這些欄位缺了多少資料？這可能會造成哪些問題？</li></ul></div>
+  <div class="nav-row"><button class="btn ghost" data-goto="7">◀ 上一步</button><button class="btn next" data-goto="9">下一步：只留下想要的資料 ▶</button></div>
+</section>
+
+<!-- ───────── 篩選 ───────── -->
+<section class="panel" data-panel="9">
+  <h1>步驟 4　只留下想要的資料 <small>約 10 分鐘</small></h1>
+  <p class="lead">既然不會再看其他欄位，就把表格縮小成只有你選的三欄；再把三欄中任何一欄是空白的年份刪掉。先用一個小範例練習。</p>
+
+  <div class="card">
+    <h3>小範例</h3>
+    <p class="muted">一張 5 列 × 5 欄的表格，每一欄都故意空了一格。勾選要留下的欄位，看看會發生什麼事。</p>
+    <div class="toolbar" id="exCols"></div>
+    <div class="ex-grid">
+      <div><div class="mini-title">① 原本的表格</div><div class="table-wrap small" id="exAll"></div></div>
+      <div><div class="mini-title">② 只留下勾選的欄</div><div class="table-wrap small" id="exSmall"></div></div>
+      <div><div class="mini-title">③ 再刪掉有空白的列</div><div class="table-wrap small" id="exNoNan"></div></div>
+    </div>
+  </div>
+
+  <h2>換你了：處理你的三個欄位</h2>
+  <div id="clean"></div>
+  <div class="stop" data-slides="P42"><ul><li>刪掉有空白的年份之後還剩幾年？少掉的年份會不會影響你的結論？</li></ul></div>
+  <div class="nav-row"><button class="btn ghost" data-goto="8">◀ 上一步</button><button class="btn next" data-goto="10">下一步：存檔 ▶</button></div>
+</section>
+
+<!-- ───────── 存檔 ───────── -->
+<section class="panel" data-panel="10">
+  <h1>步驟 5　把整理好的資料存起來 <small>約 5 分鐘</small></h1>
+  <p class="lead">我們把原本的檔案整理成只剩重要資料的乾淨表格。現在把它下載到你的電腦。<b>第三課一開始要再上傳這個檔案。</b></p>
+  <div id="saveArea"></div>
+  <div class="stop" data-slides="P42" data-ws="作業6"><ul><li>完成第二課：確認 <code>my_brazil_climate_data.csv</code> 已經下載到你的電腦，並記得放在哪裡。</li></ul></div>
+  <div class="nav-row"><button class="btn ghost" data-goto="9">◀ 上一步</button><a class="btn next" href="lesson3.html">前往第三課 ▶</a></div>
+  <p class="muted tiny" style="text-align:right"><button class="btn small ghost" id="resetAll">清除第二課的進度，重新開始</button></p>
+</section>
+
+</main>
+
+<footer class="footer">
+  本工具改編自麻省理工學院 Day of AI™「Telling Climate Stories with Data」的資料分析活動，依
+  <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a> 授權。
+  <a href="https://www.dayofai.org/privacy-and-terms-of-use" target="_blank" rel="noopener">使用條款</a>｜資料來源：World Bank Climate Change Indicators（via HDX）。所有運算都在你的瀏覽器中進行。
+</footer>
+<div class="toast" id="toast"></div>
+
+<script src="lib/chart.umd.min.js?v=20261011171038"></script>
+<script src="data/indicators-zh.js?v=20261011171038"></script>
+<script src="js/core.js?v=20261011171038"></script>
+<script src="js/explore.js?v=20261011171038"></script>
+<script src="js/lesson2.js?v=20261011171038"></script>
+</body>
+</html>

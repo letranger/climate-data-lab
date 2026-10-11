@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第三課：視覺化資料｜氣候資料實驗室</title>
+<link rel="icon" href="assets/logo-dayofai.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Rubik:wght@500;700&display=swap">
+<link rel="stylesheet" href="style.css?v=20261011171038">
+</head>
+<body>
+
+<header class="topbar">
+  <a class="brand" href="index.html">
+    <img src="assets/logo-dayofai.png" alt="Day of AI" class="logo">
+    <div><div class="brand-title">氣候資料實驗室</div><div class="brand-sub">第三課：將資料視覺化</div></div>
+  </a>
+  <nav class="lesson-nav" id="lessonNav" data-current="3"></nav>
+  <div class="pills"><span class="pill" id="studentName"></span><span class="pill" id="datasetPill" hidden></span></div>
+</header>
+
+<nav class="pipeline" id="pipeline"></nav>
+
+<main>
+
+<!-- ───────── 匯入 ───────── -->
+<section class="panel" data-panel="1">
+  <h1>匯入上次整理好的 CSV <small>約 5 分鐘</small></h1>
+  <p class="lead">先把上一課的資料拿回來：上傳你在第二課存下來的檔案（檔名是 <code>my_brazil_climate_data.csv</code>）。</p>
+  <div id="loader"></div>
+  <div class="stop" data-slides="P47–P48"><ul><li>做到這裡時讓老師知道，等老師介紹下一段再繼續。</li></ul></div>
+  <div class="nav-row"><span></span><button class="btn next" data-goto="2">下一步：折線圖 ▶</button></div>
+</section>
+
+<!-- ───────── 折線圖 ───────── -->
+<section class="panel" data-panel="2">
+  <h1>折線圖 <small>約 20 分鐘</small></h1>
+  <div class="stop compact" data-slides="P49" data-ws="作業7"><ul><li>折線圖適合呈現什麼目的、什麼類型的資料？你以前在哪裡用過折線圖？</li></ul></div>
+  <p class="lead">折線圖的 X 軸放時間（年份），Y 軸放你選的欄位，把每一年的點連成一條線，很適合看資料隨時間怎麼變化。把欄位拖到 Y 軸（或按「畫它」）就會畫出來。</p>
+  <div class="callout">
+    <b>依序做：</b>①先把三個欄位<b>各自</b>畫成一張折線圖 → ②把兩個欄位放在<b>同一張</b>圖，加上標題、軸名稱 → ③發現數字大小差太多時，把兩個欄位<b>正規化</b> → ④把<b>三個</b>欄位都正規化放在一起。左邊的清單會自動打勾。
+  </div>
+  <details class="howto"><summary>為什麼要正規化？看一個例子</summary>
+    <p>綠線的數字是幾百萬，紅線只有幾十萬。紅線本來應該是往上升的，但放在同一張圖上幾乎看不出來。差一個數量級就這樣了，差更多會更糟。</p>
+    <img class="shot small" src="assets/img/bad_twoline_graph.png" alt="兩條數字大小差很多的折線放在同一張圖">
+    <p><b>正規化（normalize）</b>就是把每一欄的範圍換成 0～1：（數值 − 最小值）÷（最大值 − 最小值）。數字變了，也損失一點精確度，但每一年是升是降的關係不變，就能把不同大小的資料放在一起比較趨勢。</p>
+  </details>
+  <div id="lineBuilder"></div>
+  <div class="stop" data-slides="P51" data-ws="作業7">
+    <p class="tbd-note"><span class="tbd" title="待小組討論後決定">待討論</span>原課程的題目是「和同學分享你的折線圖，討論哪些部分容易、哪些部分困難」，指的是<b>寫程式</b>的難易。網頁版不用寫程式，所以先改成下面三題（把「寫程式的困難」換成「做決定的困難」）。要不要這樣改，待小組決定。</p>
+    <ul>
+      <li>和同學分享你的折線圖：一個欄位畫成折線圖，看得出它這幾十年怎麼變嗎？</li>
+      <li>兩個欄位放在同一張圖、數字大小差很多時，會發生什麼事？正規化之後，看到了什麼原本看不到的？</li>
+      <li>做這張圖時，哪個決定最難下？（選哪幾欄、要不要正規化、標題怎麼寫）</li>
+    </ul></div>
+  <div class="nav-row"><button class="btn ghost" data-goto="1">◀ 上一步</button><button class="btn next" data-goto="3">下一步：散布圖 ▶</button></div>
+</section>
+
+<!-- ───────── 散布圖 ───────── -->
+<section class="panel" data-panel="3">
+  <h1>散布圖 <small>約 10 分鐘</small></h1>
+  <div class="stop compact" data-slides="P50" data-ws="作業7"><ul><li>散布圖適合呈現什麼目的、什麼類型的資料？和折線圖有什麼不同？</li></ul></div>
+  <p class="lead">散布圖的做法和折線圖幾乎一樣，你會發現圖很眼熟，只是每一個點都是分開的，沒有連起來。</p>
+  <div class="callout"><b>依序做：</b>①把三個欄位各自畫成散布圖 → ②這次自己來：把三個欄位正規化，畫成同一張散布圖。</div>
+  <div id="scatterBuilder"></div>
+  <div class="stop" data-slides="P52" data-ws="作業7">
+    <p class="tbd-note"><span class="tbd" title="待小組討論後決定">待討論</span>原課程的題目是「和小組分享你的散布圖，討論哪些部分容易、哪些部分困難」，指的是<b>寫程式</b>的難易。網頁版不用寫程式，所以先改成下面三題（把「寫程式的困難」換成「做決定的困難」）。要不要這樣改，待小組決定。</p>
+    <ul>
+      <li>和小組分享你的散布圖：同一個欄位畫成散布圖和折線圖，看到的有什麼不一樣？哪一種比較容易看出趨勢？哪一種比較容易發現特別的年份？</li>
+      <li>三個欄位正規化放在同一張散布圖，好讀嗎？點太多的時候，你怎麼讓它比較好讀？（換顏色？少放一欄？）</li>
+      <li>做這張圖時，哪個決定最難下？（選哪一欄、要不要正規化、配什麼顏色）</li>
+    </ul></div>
+  <div class="nav-row"><button class="btn ghost" data-goto="2">◀ 上一步</button><button class="btn next" data-goto="4">下一步：自訂樣式 ▶</button></div>
+</section>
+
+<!-- ───────── 自訂樣式 ───────── -->
+<section class="panel" data-panel="4">
+  <h1>自訂你的圖表 <small>約 10 分鐘</small></h1>
+  <p class="lead">到目前為止，你的圖都長得差不多：藍灰色背景、白色格線，線條用藍、橘、綠。但配色很重要，它會影響你想說的故事。</p>
+  <ul>
+    <li><b>換背景：</b>有五種背景可以選，有沒有格線、底色是灰是白。</li>
+    <li><b>換顏色：</b>按欄位標籤上的色塊挑顏色，或在旁邊的小框輸入顏色的英文名稱，例如 crimson、mediumvioletred（<a href="https://htmlcolorcodes.com/color-names/" target="_blank" rel="noopener">顏色名稱清單</a>）。多條線時，每一條可以各自換色。</li>
+    <li><b>改標題和軸名稱：</b>讓看圖的人一眼就知道這張圖在說什麼。</li>
+    <li><b>存圖：</b>按圖下方的「存成圖片」。</li>
+  </ul>
+  <div id="customBuilder"></div>
+  <div class="nav-row"><button class="btn ghost" data-goto="3">◀ 上一步</button><button class="btn next" data-goto="5">下一步：分享發現 ▶</button></div>
+</section>
+
+<!-- ───────── 分享 ───────── -->
+<section class="panel" data-panel="5">
+  <h1>和同學分享你的發現 <small>約 10 分鐘</small></h1>
+  <p class="lead">討論你們的圖表，分享你從資料裡發現了什麼故事。也聊聊你為什麼做了這些視覺上的選擇：為什麼選這組顏色？你的資料比較適合折線圖還是散布圖？</p>
+  <div class="stop" data-slides="P53" data-ws="作業7">
+    <ul>
+      <li>你在彼此的資料中看到哪些模式？這些模式和你預期的一樣嗎？</li>
+      <li>你的圖表讓你對氣候產生了哪些新的問題？</li>
+      <li>你為什麼選這組配色？你比較喜歡折線圖還是散布圖？</li>
+    </ul>
+  </div>
+  <div id="notes"></div>
+  <div class="nav-row"><button class="btn ghost" data-goto="4">◀ 上一步</button><a class="btn next" href="lesson4.html">前往第四課 ▶</a></div>
+  <p class="muted tiny" style="text-align:right"><button class="btn small ghost" id="resetAll">清除第三課的進度，重新開始</button></p>
+</section>
+
+</main>
+
+<footer class="footer">
+  本工具改編自麻省理工學院 Day of AI™「Telling Climate Stories with Data」的資料分析活動，依
+  <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a> 授權。
+  <a href="https://www.dayofai.org/privacy-and-terms-of-use" target="_blank" rel="noopener">使用條款</a>｜資料來源：World Bank Climate Change Indicators（via HDX）。所有運算都在你的瀏覽器中進行。
+</footer>
+<div class="toast" id="toast"></div>
+
+<script src="lib/chart.umd.min.js?v=20261011171038"></script>
+<script src="data/indicators-zh.js?v=20261011171038"></script>
+<script src="js/example-data.js?v=20261011171038"></script>
+<script src="js/core.js?v=20261011171038"></script>
+<script src="js/wide.js?v=20261011171038"></script>
+<script src="js/viz.js?v=20261011171038"></script>
+<script src="js/lesson3.js?v=20261011171038"></script>
+</body>
+</html>
