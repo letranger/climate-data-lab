@@ -114,13 +114,46 @@ const toNum = s => {
 
 const REDUNDANT = ["Country Name", "Country ISO3", "Indicator Code"];
 
+/* 時間鍵：年資料用西元年（2024）；逐月資料用「年×100＋月」（202407）。
+   兩種都是整數，排序、當物件的 key 都一樣；畫圖與迴歸時用 tX() 換成「年＋(月−1)/12」的數值，顯示時用 tLabel()。
+   資料框（ds）有 freq 欄位："year" 或 "month"，整個流程只在顯示文字和時間軸刻度上有差別。 */
+const isMonthKey = k => k > 100000;
+const monthly = ds => !!ds && ds.freq === "month";
+const tLabel = k => isMonthKey(k) ? `${Math.floor(k / 100)}-${String(k % 100).padStart(2, "0")}` : String(k);
+const tX = k => isMonthKey(k) ? Math.floor(k / 100) + (k % 100 - 1) / 12 : k;
+const tKey = (x, isMonth) => {                         // 數值 → 鍵（月：四捨五入到最近的月）
+  if (!isMonth) return Math.round(x);
+  let y = Math.floor(x + 1e-9), m = Math.round((x - y) * 12) + 1;
+  if (m > 12) { y += 1; m = 1; }
+  return y * 100 + m;
+};
+const tNext = (k, n = 1) => {                          // 往後 n 個單位（年或月）
+  if (!isMonthKey(k)) return k + n;
+  const y = Math.floor(k / 100), m0 = k % 100 - 1 + n;
+  return (y + Math.floor(m0 / 12)) * 100 + (((m0 % 12) + 12) % 12) + 1;
+};
+const tUnit = ds => monthly(ds) ? "月" : "年";       // 「46 年」「552 個月」的單位
+const tName = ds => monthly(ds) ? "年月" : "年份";    // 欄位標題
+const tCount = (ds, n) => monthly(ds) ? `${n} 個月` : `${n} 年`;
+const tSpan = (ds, a, b) => `${tLabel(a)}–${tLabel(b)}`;
+const parseYM = (ystr, mstr) => {                      // 讀 CSV：Year（可能是 "2024-07"）＋可有可無的 Month 欄
+  const y = String(ystr || "").trim(), m = String(mstr || "").trim();
+  let mm = /^(\d{4})[-/.](\d{1,2})$/.exec(y);
+  if (mm) return Number(mm[1]) * 100 + Number(mm[2]);
+  const yy = toNum(y);
+  if (!Number.isInteger(yy)) return NaN;
+  if (m !== "") { const mo = toNum(m); return Number.isInteger(mo) && mo >= 1 && mo <= 12 ? yy * 100 + mo : NaN; }
+  return yy;
+};
+
 /* 讀入 CSV，判斷是 HDX 原始的「長格式」（一列一筆數字），還是已經整理好的「寬格式」（一年一列）。
    長格式會保留原始的每一列，讓第二、五課可以一步一步做 iloc[1:]、drop、pivot。 */
 function ingest(text, fileName) {
   const rows = parseCSV(text);
   if (rows.length < 2) throw new Error("這個檔案好像是空的。");
   const header = rows[0].map(h => h.trim());
-  const yi = header.findIndex(h => /^year$/i.test(h));
+  const yi = header.findIndex(h => /^(year|yearmonth)$/i.test(h));
+  const mi = header.findIndex(h => /^month$/i.test(h));
   const ii = header.indexOf("Indicator Name");
   const vi = header.indexOf("Value");
   const ci = header.indexOf("Country Name");
@@ -131,26 +164,29 @@ function ingest(text, fileName) {
     out.hasHxl = rows.length > 1 && rows[1].some(x => x.trim().startsWith("#"));
     const recs = [];
     for (const r of rows.slice(1)) {
-      const y = toNum(r[yi]);
+      const y = parseYM(r[yi], mi >= 0 ? r[mi] : "");
       if (!Number.isInteger(y)) continue;
       if (ci >= 0 && !out.country && r[ci]) out.country = r[ci];
       if (iso >= 0 && !out.iso && r[iso]) out.iso = r[iso];
       recs.push({ year: y, name: r[ii], value: toNum(r[vi]) });
     }
     if (!recs.length) throw new Error("找不到任何年份資料。");
+    out.freq = recs.some(r => isMonthKey(r.year)) ? "month" : "year";
     out.long = recs;
   } else if (yi >= 0) {
     out.format = "wide";
-    const cols = header.filter((h, j) => j !== yi && h !== "");
+    const skip = new Set([yi, mi].filter(j => j >= 0));
+    const cols = header.filter((h, j) => !skip.has(j) && h !== "" && !/^(year|month)$/i.test(h));
     const data = {}; cols.forEach(c => data[c] = {});
     const years = [];
     for (const r of rows.slice(1)) {
-      const y = toNum(r[yi]);
+      const y = parseYM(r[yi], mi >= 0 ? r[mi] : "");
       if (!Number.isInteger(y)) continue;
       years.push(y);
-      header.forEach((h, j) => { if (j !== yi && h !== "") { const v = toNum(r[j]); if (isNum(v)) data[h][y] = v; } });
+      header.forEach((h, j) => { if (!skip.has(j) && cols.includes(h)) { const v = toNum(r[j]); if (isNum(v)) data[h][y] = v; } });
     }
-    out.wide = { years: [...new Set(years)].sort((a, b) => a - b), cols, data };
+    out.freq = years.some(isMonthKey) ? "month" : "year";
+    out.wide = { years: [...new Set(years)].sort((a, b) => a - b), cols, data, freq: out.freq };
     const m = fileName.match(/^my_(.+?)_climate_data/i) || fileName.match(/^ex_(.+?)_climate_data/i);
     if (m) out.country = m[1].replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
   } else {
@@ -160,12 +196,12 @@ function ingest(text, fileName) {
 }
 
 // 長格式 → 「一年一列、一個指標一欄」（等同 pandas 的 df.pivot(index='Year', columns='Indicator Name', values='Value')）
-function pivot(long) {
+function pivot(long, freq = "year") {
   const years = [...new Set(long.map(r => r.year))].sort((a, b) => a - b);
   const cols = [...new Set(long.map(r => r.name))].sort();
   const data = {}; cols.forEach(c => data[c] = {});
   for (const r of long) if (isNum(r.value)) data[r.name][r.year] = r.value;
-  return { years, cols, data };
+  return { years, cols, data, freq };
 }
 
 const missingPct = (ds, col) => 100 * (1 - ds.years.filter(y => isNum(ds.data[col][y])).length / ds.years.length);
@@ -173,22 +209,22 @@ const missingPct = (ds, col) => 100 * (1 - ds.years.filter(y => isNum(ds.data[co
 function subset(ds, cols, { dropna = false } = {}) {
   const years = dropna ? ds.years.filter(y => cols.every(c => isNum(ds.data[c][y]))) : ds.years.slice();
   const data = {}; cols.forEach(c => { data[c] = {}; years.forEach(y => { if (isNum(ds.data[c][y])) data[c][y] = ds.data[c][y]; }); });
-  return { years, cols: cols.slice(), data };
+  return { years, cols: cols.slice(), data, freq: ds.freq || "year" };
 }
 
 function wideCSV(ds) {
   const q = s => /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-  return ["Year," + ds.cols.map(q).join(","), ...ds.years.map(y => [y, ...ds.cols.map(k => isNum(ds.data[k][y]) ? ds.data[k][y] : "")].join(","))].join("\n") + "\n";
+  return [(monthly(ds) ? "YearMonth," : "Year,") + ds.cols.map(q).join(","), ...ds.years.map(y => [tLabel(y), ...ds.cols.map(k => isNum(ds.data[k][y]) ? ds.data[k][y] : "")].join(","))].join("\n") + "\n";
 }
 
 const COUNTRY_ZH = {
-  BRA: "巴西", USA: "美國", JPN: "日本", KOR: "韓國", PHL: "菲律賓", VNM: "越南", IDN: "印尼", THA: "泰國",
+  TWN: "台灣", BRA: "巴西", USA: "美國", JPN: "日本", KOR: "韓國", PHL: "菲律賓", VNM: "越南", IDN: "印尼", THA: "泰國",
   IND: "印度", CHN: "中國", AUS: "澳洲", CAN: "加拿大", GBR: "英國", DEU: "德國", FRA: "法國", MYS: "馬來西亞", SGP: "新加坡",
 };
 const countryLabel = (country, iso) => (iso && COUNTRY_ZH[iso]) || country || "";
-function myFileName(country) {
+function myFileName(country, isMonth = false) {
   const slug = (country || "").toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
-  return slug ? `my_${slug}_climate_data.csv` : "my_climate_data.csv";
+  return (slug ? `my_${slug}_climate_data` : "my_climate_data") + (isMonth ? "_monthly" : "") + ".csv";
 }
 
 // ───────────────────────── 統計與模型 ─────────────────────────
@@ -263,7 +299,7 @@ function svrFit(xsRaw, ysRaw, { C = 1, eps = 0.1, gamma = 1 } = {}) {
 }
 
 // ───────────────────────── 表格 ─────────────────────────
-function tableHTML(ds, cols, { years = ds.years, showMiss = false, removedYears = null, yearLabel = "年份" } = {}) {
+function tableHTML(ds, cols, { years = ds.years, showMiss = false, removedYears = null, yearLabel = tName(ds) } = {}) {
   let h = `<table class="data"><thead><tr><th>${esc(yearLabel)}</th>`;
   for (const c of cols) {
     h += `<th>${hasZh(c) ? esc(zh(c)) + `<span class="en">${esc(c)}</span>` : esc(c)}`;
@@ -273,7 +309,7 @@ function tableHTML(ds, cols, { years = ds.years, showMiss = false, removedYears 
   h += "</tr></thead><tbody>";
   for (const y of years) {
     const cls = removedYears && removedYears.has(y) ? ' class="removed"' : "";
-    h += `<tr${cls}><td>${y}</td>` + cols.map(c => `<td>${fmt(ds.data[c][y])}</td>`).join("") + "</tr>";
+    h += `<tr${cls}><td>${tLabel(y)}</td>` + cols.map(c => `<td>${fmt(ds.data[c][y])}</td>`).join("") + "</tr>";
   }
   return h + "</tbody></table>";
 }
@@ -395,7 +431,9 @@ function applyTheme(opts, theme = "white") {
   }
   return opts;
 }
-function baseOpts({ legend = true, xTitle = "", yTitle = "", title = "", theme = "white" } = {}) {
+/* X 軸是時間時的刻度文字：年資料照常顯示整數年；逐月資料的 x 是「年＋(月−1)/12」，刻度換成「2024-07」 */
+const timeTicks = isMonth => isMonth ? (v => (Math.abs(v * 12 - Math.round(v * 12)) < 1e-6 ? tLabel(tKey(v, true)) : "")) : (v => Number.isInteger(v) ? String(v) : "");
+function baseOpts({ legend = true, xTitle = "", yTitle = "", title = "", theme = "white", timeX = null } = {}) {
   const o = {
     responsive: true, maintainAspectRatio: false, animation: { duration: 250 },
     interaction: { mode: "nearest", intersect: false },
@@ -405,7 +443,7 @@ function baseOpts({ legend = true, xTitle = "", yTitle = "", title = "", theme =
       tooltip: { callbacks: {} },
     },
     scales: {
-      x: { type: "linear", title: { display: !!xTitle, text: xTitle }, ticks: { callback: v => String(v) } },
+      x: { type: "linear", title: { display: !!xTitle, text: xTitle }, ticks: { callback: timeX === null ? (v => String(v)) : timeTicks(timeX) } },
       y: { title: { display: !!yTitle, text: yTitle }, ticks: { callback: v => fmtPlain(v) } },
     },
   };
@@ -544,8 +582,9 @@ function initPage() {
   decorateStops();
   const ln = $("#lessonNav");
   if (ln) {
-    const cur = Number(ln.dataset.current);
-    ln.innerHTML = `<a href="index.html" class="${cur ? "" : "on"}">首頁</a>` + [2, 3, 4, 5].map(n => `<a href="lesson${n}.html" class="${n === cur ? "on" : ""}">第 ${n} 課</a>`).join("");
+    const cur = String(ln.dataset.current || "");
+    const pages = [[2, "第 2 課"], [3, "第 3 課"], [4, "第 4 課"], [5, "第 5 課（其他國家）"], ["5tw", "第 5 課（臺灣）"]];
+    ln.innerHTML = `<a href="index.html" class="${cur ? "" : "on"}">首頁</a>` + pages.map(([n, t]) => `<a href="lesson${n}.html" class="${String(n) === cur ? "on" : ""}">${t}</a>`).join("");
   }
   const nm = $("#studentName");
   if (nm) { nm.classList.add("editable"); nm.setAttribute("role", "button"); nm.tabIndex = 0; nm.addEventListener("click", editNamePill); nm.addEventListener("keydown", e => { if (e.key === "Enter" && e.target === nm) editNamePill(); }); renderNamePill(); }
@@ -556,6 +595,7 @@ return {
   $, $$, esc, zh, hasZh, nameHTML, isNum, fmt, fmtPlain, toast, download,
   makeStore, getName, setName,
   parseCSV, ingest, pivot, missingPct, subset, wideCSV, REDUNDANT, COUNTRY_ZH, countryLabel, myFileName,
+  isMonthKey, monthly, tLabel, tX, tKey, tNext, tUnit, tName, tCount, tSpan,
   mean, std, pearson, corrPair, linFit, scaler, svrFit,
   tableHTML, rawTableHTML,
   makeChip, dropTarget, bindFileDrop,

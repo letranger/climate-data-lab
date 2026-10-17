@@ -1,2 +1,8 @@
 .DS_Store
 _test/
+
+# 臺灣資料的原始下載檔（約 111 MB）不進 repo；manifest.json 記錄每個檔的網址與 SHA-256，重跑 tools/taiwan/fetch.py 可補回
+tools/taiwan/raw/*
+!tools/taiwan/raw/manifest.json
+tools/taiwan/typhoon_parsed.csv
+.DS_Store

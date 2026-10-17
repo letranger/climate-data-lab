@@ -1,8 +1,10 @@
-/* 資料探索元件（第二課、第五課共用）：上傳 HDX 原始 CSV → 刪標籤列、刪重複欄位、重新排列 → 刪除缺失 ≥60% 的欄位
+/* 資料探索元件（第二課、第五課共用）：上傳 HDX 原始 CSV → （舊檔才有：刪標籤列）、刪重複欄位、重新排列 → 刪除缺失 ≥60% 的欄位
    → 列出欄位、看單一欄位、選三個欄位、相關係數 → 只留三欄、刪掉有空白的年份 → 存成 my_xxx_climate_data.csv。
    S 是該課的進度物件（會存進 localStorage），save() 存檔，onChange() 讓頁面更新步驟導覽。 */
 CDL.Explore = function ({ S, save, onChange = () => {} }) {
-const { $, $$, esc, zh, nameHTML, isNum, fmtPlain, toast } = CDL;
+const { $, $$, esc, zh, nameHTML, isNum, fmtPlain, toast, tLabel, tX, tCount, tSpan } = CDL;
+const U = () => CDL.tUnit(PIV);                 // 「年」或「月」
+const TN = () => CDL.tName(PIV);                // 「年份」或「年月」
 
 Object.assign(S, Object.assign({ fileName: "", csvText: "", reform: 0, threshold: 60, dropped: [], selected: [null, null, null], narrowed: false, cleaned: false }, S));
 let IN = null, PIV = null;            // 讀入結果、樞紐後的資料框（不存檔，載入時重算）
@@ -13,11 +15,11 @@ const changed = () => { save(); onChange(); refresh(); };
 function load(text, name, { silent = false } = {}) {
   let r;
   try { r = CDL.ingest(text, name); } catch (e) { toast(e.message, 5000); return false; }
-  if (r.format !== "long") { toast("這個檔案已經整理過了。這裡要上傳從 HDX 下載的原始檔（檔名像 climate-change_xxx.csv）。", 6000); return false; }
-  IN = r; PIV = CDL.pivot(r.long);
+  if (r.format !== "long") { toast("這個檔案已經整理過了。這裡要上傳原始檔（檔名像 climate-change_xxx.csv）。", 6000); return false; }
+  IN = r; PIV = CDL.pivot(r.long, r.freq);
   if (!silent) {
     Object.assign(S, { fileName: name, csvText: text, reform: 0, dropped: [], selected: [null, null, null], narrowed: false, cleaned: false });
-    toast(`已上傳 ${name}`);
+    toast(r.freq === "month" ? `已上傳 ${name}（逐月資料：接下來每一列是一個月，其他步驟都一樣）` : `已上傳 ${name}`, r.freq === "month" ? 5000 : 2600);
   }
   return true;
 }
@@ -31,7 +33,7 @@ const wide = () => pivoted() ? CDL.subset(PIV, keptCols()) : null;
 const clean = () => S.cleaned && selectedCols().length ? CDL.subset(PIV, selectedCols(), { dropna: true }) : null;
 const country = () => IN ? IN.country || "" : "";
 const iso = () => IN ? IN.iso || "" : "";
-const saveName = () => CDL.myFileName(country());
+const saveName = () => CDL.myFileName(country(), CDL.monthly(PIV));
 
 function refresh() { mounts.forEach(m => m.el.isConnected && m.render()); }
 function mount(el, render) { const m = { el, render }; mounts.push(m); render(); return m; }
@@ -49,48 +51,50 @@ function mountUpload(el, { expectIso = "", fileHint = "climate-change_xxx.csv" }
   });
   return mount(el, () => {
     const st = $(".upload-status", el);
-    st.innerHTML = IN ? `<div class="ok-box">✅ 已上傳 <code>${esc(S.fileName)}</code>：${esc(CDL.countryLabel(country(), iso()))}${iso() ? `（${esc(iso())}）` : ""}，共 ${IN.totalRows.toLocaleString()} 列。</div>` : "";
+    st.innerHTML = IN ? `<div class="ok-box">✅ 已上傳 <code>${esc(S.fileName)}</code>：${esc(CDL.countryLabel(country(), iso()))}${iso() ? `（${esc(iso())}）` : ""}，共 ${IN.totalRows.toLocaleString()} 列${CDL.monthly(PIV) ? "，<b>逐月資料</b>（一列是某一個月的一個數字）" : ""}。</div>` : "";
   });
 }
 
-// ───────── 整理成「一年一列」：刪標籤列 → 刪重複欄位 → 重新排列 ─────────
+// ───────── 整理成「一年一列」：（舊檔才有：刪標籤列）→ 刪重複欄位 → 重新排列 ─────────
 function mountReformat(el) {
   return mount(el, () => {
     if (!IN) { el.innerHTML = '<div class="card muted">請先上傳 CSV 檔。</div>'; return; }
-    const r = S.reform;
     const hx = IN.hasHxl;
+    // HDX 新版檔案沒有 #country+name 標籤列，就直接跳過「刪掉第一列」這一步，不顯示
+    const r = hx ? S.reform : Math.max(S.reform, 1);
+    let n = 0; const num = () => "①②③④⑤"[n++];
     // 依目前進度顯示 df：刪掉第一列之後就不再顯示標籤列；刪掉三欄之後只剩 Year、Indicator Name、Value
     let rows = r >= 1 && hx ? [IN.rows[0], ...IN.rows.slice(2)] : IN.rows;
     if (r >= 2) {
       const keepIdx = IN.header.map((c, j) => CDL.REDUNDANT.includes(c) ? -1 : j).filter(j => j >= 0);
       rows = rows.slice(0, 14).map(row => keepIdx.map(j => row[j]));
     }
-    const stage = r === 0 ? "整理前" : r === 1 ? "刪掉標籤列之後" : r === 2 ? "刪掉用不到的欄位之後" : "整理完成";
-    let h = `<p class="muted">這就是你上傳的那份檔案（共 ${IN.totalRows.toLocaleString()} 列，一列只記錄「某一年、某一個指標」的一個數字）。接下來依序按下面的按鈕，表格會跟著改變。</p>
-      ${r >= 3 ? "" : `<h3>① 目前的表格（${stage}，只顯示前 6 列）</h3>
+    const stage = r === 0 || (r === 1 && !hx) ? "整理前" : r === 1 ? "刪掉標籤列之後" : r === 2 ? "刪掉用不到的欄位之後" : "整理完成";
+    const mon = CDL.monthly(PIV);
+    let h = `<p class="muted">這就是你上傳的那份檔案（共 ${IN.totalRows.toLocaleString()} 列，一列只記錄「某一${mon ? "個月" : "年"}、某一個指標」的一個數字）。接下來依序按下面的按鈕，表格會跟著改變。</p>
+      ${r >= 3 ? "" : `<h3>${num()} 目前的表格（${stage}，只顯示前 6 列）</h3>
       <div class="table-wrap small">${CDL.rawTableHTML(rows, { max: 7, strikeRow: r === 0 && hx ? 0 : -1, strikeCols: r === 1 ? CDL.REDUNDANT : [] })}</div>`}`;
-    // 第一步：刪掉第一列
-    h += `<div class="substep ${r >= 1 ? "done" : ""}"><h3>② 刪掉第一列的標籤 <span class="tbd" title="待小組討論後決定">待討論</span></h3>`;
-    h += hx
-      ? `<p>第一列（編號 0）是 <code>#country+name</code> 這類「標籤」，不是資料。</p>`
-      : `<p class="callout">你下載的這份檔案<b>沒有</b> <code>#country+name</code> 這種標籤列（HDX 新版的檔案拿掉了），第一列就是真正的資料，這一步可以跳過。</p>`;
-    h += r >= 1 ? `<p class="ok-line">✓ 完成</p>` : `<button class="btn primary" data-re="1">${hx ? "刪掉第一列" : "知道了，下一步"} ▶</button>`;
-    h += `</div>`;
+    // 第一步：刪掉第一列（只有舊版檔案才有這一列）
+    if (hx) {
+      h += `<div class="substep ${r >= 1 ? "done" : ""}"><h3>${num()} 刪掉第一列的標籤</h3>
+        <p>第一列（編號 0）是 <code>#country+name</code> 這類「標籤」，不是資料。</p>
+        ${r >= 1 ? `<p class="ok-line">✓ 完成</p>` : `<button class="btn primary" data-re="1">刪掉第一列 ▶</button>`}</div>`;
+    }
     if (r >= 1) {
-      h += `<div class="substep ${r >= 2 ? "done" : ""}"><h3>③ 刪掉用不到的欄位</h3>
+      h += `<div class="substep ${r >= 2 ? "done" : ""}"><h3>${num()} 刪掉用不到的欄位</h3>
         <p>每一列的國家名稱、國家代碼都一樣，指標代碼和指標名稱也重複，留著沒用。（上面表格中劃線的就是這三欄）</p>
-        ${r >= 2 ? `<p class="ok-line">✓ 完成，剩下 Year、Indicator Name、Value 三欄</p>` : `<button class="btn primary" data-re="2">刪掉這三欄 ▶</button>`}</div>`;
+        ${r >= 2 ? `<p class="ok-line">✓ 完成，剩下 Year、${mon ? "Month、" : ""}Indicator Name、Value ${mon ? "四" : "三"}欄</p>` : `<button class="btn primary" data-re="2">刪掉這三欄 ▶</button>`}</div>`;
     }
     if (r >= 2) {
-      h += `<div class="substep ${r >= 3 ? "done" : ""}"><h3>④ 重新排成「一年一列、一個指標一欄」</h3>
-        <p>把「指標名稱」變成欄、「年份」變成列。這種表格叫做<b>資料框</b>，在 Excel 裡叫做<b>樞紐分析</b>。</p>
+      h += `<div class="substep ${r >= 3 ? "done" : ""}"><h3>${num()} 重新排成「一${mon ? "個月" : "年"}一列、一個指標一欄」</h3>
+        <p>把「指標名稱」變成欄、「${mon ? "年月" : "年份"}」變成列。這種表格叫做<b>資料框</b>，在 Excel 裡叫做<b>樞紐分析</b>。</p>
         ${r >= 3 ? "" : `<button class="btn primary" data-re="3">重新排列 ▶</button>`}</div>`;
     }
     if (r >= 3) {
-      h += `<h3>⑤ 整理好的資料表</h3>
-        <p>現在是 <b>${PIV.years.length}</b> 年（${PIV.years[0]}–${PIV.years.at(-1)}）× <b>${PIV.cols.length}</b> 個指標。每一欄最上方的 <span class="miss-inline">缺 %</span> 是這一欄有多少年沒有資料。</p>
+      h += `<h3>${num()} 整理好的資料表</h3>
+        <p>現在是 <b>${tCount(PIV, PIV.years.length)}</b>（${tSpan(PIV, PIV.years[0], PIV.years.at(-1))}）× <b>${PIV.cols.length}</b> 個指標。每一欄最上方的 <span class="miss-inline">缺 %</span> 是這一欄有多少${U()}沒有資料。</p>
         <div class="table-wrap">${CDL.tableHTML(PIV, PIV.cols, { showMiss: true })}</div>
-        <div class="hint">表格裡灰色的 <span class="nan">—</span> 代表那一年沒有這個指標的資料。這不是你做錯了什麼。</div>`;
+        <div class="hint">表格裡灰色的 <span class="nan">—</span> 代表那一${mon ? "個月" : "年"}沒有這個指標的資料。這不是你做錯了什麼。</div>`;
     }
     el.innerHTML = h;
     $$("[data-re]", el).forEach(b => b.addEventListener("click", () => {
@@ -114,7 +118,7 @@ function mountMissing(el, { slider = true } = {}) {
       <button class="btn small ghost thr60" type="button">回到 60%</button></div>
       <p class="muted tiny">拉拉看：門檻變了，下面那行「刪掉之後」的數字怎麼變？哪些欄位會被留下或刪掉？</p></details>` : ""}
     <div class="miss-summary card"></div>
-    <div class="legend-row"><span class="sw keep"></span>保留　<span class="sw drop"></span>將被刪除　（長條＝缺失比例；右邊是這一欄有資料的年份）</div>
+    <div class="legend-row"><span class="sw keep"></span>保留　<span class="sw drop"></span>將被刪除　（長條＝缺失比例；右邊是這一欄有資料的時間範圍）</div>
     <div class="missing-list"></div>`;
   const thr = $(".thr", el);
   if (thr) thr.addEventListener("input", e => { S.threshold = Number(e.target.value); save(); render(); });
@@ -133,10 +137,10 @@ function mountMissing(el, { slider = true } = {}) {
   function coverage(c) {
     const ys = PIV.years.filter(y => isNum(PIV.data[c][y]));
     if (!ys.length) return { text: "沒有資料", tag: "" };
-    const a = ys[0], b = ys.at(-1), gaps = b - a + 1 - ys.length;
+    const a = ys[0], b = ys.at(-1), gaps = PIV.years.indexOf(b) - PIV.years.indexOf(a) + 1 - ys.length, u = U();
     const early = a > PIV.years[0], late = b < PIV.years.at(-1);
-    const tag = ys.length <= 5 ? `只有 ${ys.length} 年有資料` : gaps > 0 ? `中間斷 ${gaps} 年` : early ? "早年沒資料" : late ? "最近幾年沒資料" : "每年都有";
-    return { text: a === b ? `${a}` : `${a}–${b}`, tag };
+    const tag = ys.length <= 5 ? `只有 ${ys.length} ${u}有資料` : gaps > 0 ? `中間斷 ${gaps} ${u}` : early ? `早期沒資料` : late ? `最近沒資料` : `每${u}都有`;
+    return { text: a === b ? tLabel(a) : tSpan(PIV, a, b), tag };
   }
   function render() {
     if (!pivoted()) {
@@ -163,7 +167,7 @@ function mountMissing(el, { slider = true } = {}) {
       const maxMiss = Math.max(...keep.map(x => x.p));
       const blank = keep.reduce((s, x) => s + x.p, 0) / keep.length;
       const full = PIV.years.filter(y => keep.every(x => isNum(PIV.data[x.c][y])));
-      sum.innerHTML = `<b>依 ${t}% 刪掉之後：</b>保留 <b>${keep.length}</b> 欄、刪掉 <b>${drop}</b> 欄｜保留的欄位最多還缺 <b>${maxMiss.toFixed(1)}%</b>｜整張表還有 <b>${blank.toFixed(0)}%</b> 是空格｜保留的欄位全都有資料的年份：<b>${full.length ? `${full[0]}–${full.at(-1)}（${full.length} 年）` : "沒有"}</b>
+      sum.innerHTML = `<b>依 ${t}% 刪掉之後：</b>保留 <b>${keep.length}</b> 欄、刪掉 <b>${drop}</b> 欄｜保留的欄位最多還缺 <b>${maxMiss.toFixed(1)}%</b>｜整張表還有 <b>${blank.toFixed(0)}%</b> 是空格｜保留的欄位全都有資料的${TN()}：<b>${full.length ? `${tSpan(PIV, full[0], full.at(-1))}（${tCount(PIV, full.length)}）` : "沒有"}</b>
         <div class="muted tiny" style="margin-top:.3rem">缺失比例高，不一定代表資料很爛：很多指標是 1990 年後才開始統計，「早年沒資料」的欄位，從 1990 年起其實每年都有。</div>`;
     } else sum.innerHTML = `<b>依 ${t}% 刪掉之後：</b>所有欄位都會被刪掉。`;
     const n = list.filter(x => x.p >= t && !S.dropped.includes(x.c)).length;
@@ -250,7 +254,7 @@ function mountPicker(el, { slots = [0, 1, 2], corr = false, example = false, yea
     // 這一步要選幾個、怎麼選
     const need = slots.filter(i => !S.selected[i]), names = need.map(i => `欄位 ${i + 1}`).join("、");
     $(".pick-howto", el).innerHTML = slots.length === 1
-      ? (need.length ? `<b>這一步要選 1 個欄位（欄位 1）。</b>點左邊的欄位，它就會放進「欄位 1」，右邊同時畫出它每一年的資料。想換就點另一個欄位，可以多點幾個比較看看。`
+      ? (need.length ? `<b>這一步要選 1 個欄位（欄位 1）。</b>點左邊的欄位，它就會放進「欄位 1」，右邊同時畫出它每一${U()}的資料。想換就點另一個欄位，可以多點幾個比較看看。`
                      : `<b>✓ 欄位 1 選好了。</b>想換就直接點左邊另一個欄位。`)
       : (need.length ? `<b>這一步要選 ${need.length} 個欄位（${names}）。</b>點左邊的欄位，會依序放進空的格子，右邊畫出你剛點的那一欄。點錯了，再點一次那個欄位（或按格子右上角的 ×）就會拿掉。`
                      : `<b>✓ 三個欄位都選好了。</b>想換的話，先點一下已選的欄位把它拿掉，再點別的欄位。點右邊的格子可以再看一次那一欄的資料。`);
@@ -263,7 +267,7 @@ function mountPicker(el, { slots = [0, 1, 2], corr = false, example = false, yea
     const box = $(".preview", el);
     if (!st.preview || !S.selected.includes(st.preview)) st.preview = mine().at(-1) || null;
     const col = st.preview;
-    if (!col || !PIV.data[col]) { box.innerHTML = `<div class="muted">點左邊任一個欄位，這裡會畫出這一欄每一年的資料。記得往下捲看完所有年份。</div>`; return; }
+    if (!col || !PIV.data[col]) { box.innerHTML = `<div class="muted">點左邊任一個欄位，這裡會畫出這一欄每一${U()}的資料。記得往下捲看完所有${TN()}。</div>`; return; }
     const ds = PIV;
     let yrs = ds.years;
     if (years) {
@@ -272,15 +276,15 @@ function mountPicker(el, { slots = [0, 1, 2], corr = false, example = false, yea
     }
     const has = yrs.filter(y => isNum(ds.data[col][y])), vals = has.map(y => ds.data[col][y]);
     box.innerHTML = `<h3>${nameHTML(col)}</h3>
-      <div class="muted tiny">有資料 ${has.length} 年${has.length ? `（${has[0]}–${has.at(-1)}）` : ""}，缺失 ${CDL.missingPct(ds, col).toFixed(1)}%${vals.length ? `｜最小 ${fmtPlain(Math.min(...vals))}｜最大 ${fmtPlain(Math.max(...vals))}` : ""}</div>
-      ${years ? `<div class="toolbar">只看 <select class="y0">${ds.years.map(y => `<option${y === st.y0 ? " selected" : ""}>${y}</option>`).join("")}</select> 到 <select class="y1">${ds.years.map(y => `<option${y === st.y1 ? " selected" : ""}>${y}</option>`).join("")}</select> 年</div>` : ""}
-      <div class="preview-grid"><div class="table-wrap small"><table class="data"><thead><tr><th>年份</th><th>數值</th></tr></thead><tbody>${has.map(y => `<tr><td>${y}</td><td>${CDL.fmt(ds.data[col][y])}</td></tr>`).join("")}</tbody></table></div><div class="chart-box"><canvas id="prev_${el.id}"></canvas></div></div>`;
+      <div class="muted tiny">有資料 ${tCount(ds, has.length)}${has.length ? `（${tSpan(ds, has[0], has.at(-1))}）` : ""}，缺失 ${CDL.missingPct(ds, col).toFixed(1)}%${vals.length ? `｜最小 ${fmtPlain(Math.min(...vals))}｜最大 ${fmtPlain(Math.max(...vals))}` : ""}</div>
+      ${years ? `<div class="toolbar">只看 <select class="y0">${ds.years.map(y => `<option value="${y}"${y === st.y0 ? " selected" : ""}>${tLabel(y)}</option>`).join("")}</select> 到 <select class="y1">${ds.years.map(y => `<option value="${y}"${y === st.y1 ? " selected" : ""}>${tLabel(y)}</option>`).join("")}</select></div>` : ""}
+      <div class="preview-grid"><div class="table-wrap small"><table class="data"><thead><tr><th>${TN()}</th><th>數值</th></tr></thead><tbody>${has.map(y => `<tr><td>${tLabel(y)}</td><td>${CDL.fmt(ds.data[col][y])}</td></tr>`).join("")}</tbody></table></div><div class="chart-box"><canvas id="prev_${el.id}"></canvas></div></div>`;
     $(".y0", box)?.addEventListener("change", e => { st.y0 = Number(e.target.value); renderPreview(); });
     $(".y1", box)?.addEventListener("change", e => { st.y1 = Number(e.target.value); renderPreview(); });
     CDL.drawChart(`prev_${el.id}`, {
       type: "line",
-      data: { datasets: [{ label: zh(col), data: has.map((y, i) => ({ x: y, y: vals[i] })), borderColor: CDL.SNS[0], backgroundColor: CDL.SNS[0], pointRadius: 2, tension: 0 }] },
-      options: CDL.baseOpts({ legend: false, xTitle: "年份" }),
+      data: { datasets: [{ label: zh(col), data: has.map((y, i) => ({ x: tX(y), y: vals[i], t: y })), borderColor: CDL.SNS[0], backgroundColor: CDL.SNS[0], pointRadius: 2, tension: 0 }] },
+      options: (() => { const o = CDL.baseOpts({ legend: false, xTitle: TN(), timeX: CDL.monthly(ds) }); o.plugins.tooltip.callbacks.label = c => `${tLabel(c.raw.t)}：${fmtPlain(c.raw.y)}`; return o; })(),
     });
   }
 
@@ -302,8 +306,8 @@ function mountPicker(el, { slots = [0, 1, 2], corr = false, example = false, yea
       return `<div class="corr-row"><div class="name">${nameHTML(c)}</div>
         <div class="corr-bar"><span style="left:${left}%;width:${w}%;background:${corrColor(r)}"></span></div>
         <div class="r">${r.toFixed(2)}</div>
-        <div class="n">${n} 年 ${S.selected.includes(c) ? "✓" : slots.length > 1 && slots.some(k => !S.selected[k]) ? `<button class="btn small add" data-add="${esc(c)}">選它</button>` : ""}</div></div>`;
-    }).join("") || `<div class="muted">${constant(base) ? "這個欄位每一年的數字都一樣（例如每年都是 100%），沒有變化，就算不出相關係數。可以換一個會變化的欄位當欄位 1。" : "沒有足夠的共同年份可以計算。"}</div>`}</div>`;
+        <div class="n">${tCount(PIV, n)} ${S.selected.includes(c) ? "✓" : slots.length > 1 && slots.some(k => !S.selected[k]) ? `<button class="btn small add" data-add="${esc(c)}">選它</button>` : ""}</div></div>`;
+    }).join("") || `<div class="muted">${constant(base) ? "這個欄位每一期的數字都一樣（例如每年都是 100%），沒有變化，就算不出相關係數。可以換一個會變化的欄位當欄位 1。" : `沒有足夠的共同${TN()}可以計算。`}</div>`}</div>`;
   }
   function renderCorr() {
     const area = $(".corr-wrap", el), base = S.selected[0];
@@ -329,7 +333,7 @@ function mountPicker(el, { slots = [0, 1, 2], corr = false, example = false, yea
           show.map(c => `<th class="top">${esc(zh(c))}</th>`).join("") + "</tr>" +
           show.map(a => `<tr><th>${esc(zh(a))}</th>` + show.map(b => {
             const { r, n } = a === b ? { r: 1, n: 0 } : CDL.corrPair(PIV, a, b);
-            return `<td style="background:${corrColor(r)};color:${Math.abs(r) > .6 ? "#fff" : "inherit"}" title="${esc(zh(a))} × ${esc(zh(b))}：${isNum(r) ? r.toFixed(2) : "資料不足"}${n ? `（${n} 年）` : ""}">${isNum(r) ? r.toFixed(2) : "—"}</td>`;
+            return `<td style="background:${corrColor(r)};color:${Math.abs(r) > .6 ? "#fff" : "inherit"}" title="${esc(zh(a))} × ${esc(zh(b))}：${isNum(r) ? r.toFixed(2) : "資料不足"}${n ? `（${tCount(PIV, n)}）` : ""}">${isNum(r) ? r.toFixed(2) : "—"}</td>`;
           }).join("") + "</tr>").join("") + "</table></div></div>";
       }
     }
@@ -358,14 +362,14 @@ function mountClean(el, { download = true } = {}) {
       ${S.narrowed ? `<p class="ok-line">✓ 完成</p>` : '<button class="btn primary nar">只留下這三欄 ▶</button>'}</div>`;
     if (S.narrowed) {
       h += `<div class="table-wrap" style="margin:.8rem 0">${CDL.tableHTML(ds, cols, { removedYears: S.cleaned ? removed : null })}</div>`;
-      h += `<div class="card"><h3>② 刪掉有空白的年份</h3>
-        <p class="muted">三個欄位中只要有一個是空白，那一年就整列刪掉。${S.cleaned ? "" : `將會刪掉 <b>${removed.size}</b> 年，留下 <b>${keep.length}</b> 年。`}</p>
-        ${S.cleaned ? `<p class="ok-line">✓ 完成（上面表格中劃掉的是被刪掉的年份）</p>` : '<button class="btn primary dna">刪掉有空白的年份 ▶</button>'}</div>`;
+      h += `<div class="card"><h3>② 刪掉有空白的${TN()}</h3>
+        <p class="muted">三個欄位中只要有一個是空白，那一${CDL.monthly(ds) ? "個月" : "年"}就整列刪掉。${S.cleaned ? "" : `將會刪掉 <b>${tCount(ds, removed.size)}</b>，留下 <b>${tCount(ds, keep.length)}</b>。`}</p>
+        ${S.cleaned ? `<p class="ok-line">✓ 完成（上面表格中劃掉的是被刪掉的${TN()}）</p>` : `<button class="btn primary dna">刪掉有空白的${TN()} ▶</button>`}</div>`;
     }
     if (S.cleaned) {
       h += `<div class="card done-card"><h3>✅ 資料整理完成</h3>
-        <p>從 <b>${all.length}</b> 年（${all[0]}–${all.at(-1)}）變成 <b>${keep.length}</b> 年${keep.length ? `（${keep[0]}–${keep.at(-1)}）` : ""}。</p>
-        ${keep.length < 8 ? '<p class="callout">⚠️ 剩下的年份太少了，後面畫圖和預測會很難做。建議回去換一個缺失比較少的欄位。</p>' : ""}
+        <p>從 <b>${tCount(ds, all.length)}</b>（${tSpan(ds, all[0], all.at(-1))}）變成 <b>${tCount(ds, keep.length)}</b>${keep.length ? `（${tSpan(ds, keep[0], keep.at(-1))}）` : ""}。</p>
+        ${keep.length < (CDL.monthly(ds) ? 24 : 8) ? `<p class="callout">⚠️ 剩下的${TN()}太少了，後面畫圖和預測會很難做。建議回去換一個缺失比較少的欄位。</p>` : ""}
         ${download ? `<button class="btn primary dl">⬇ 下載 ${esc(saveName())}</button>` : ""}</div>`;
     }
     el.innerHTML = h;

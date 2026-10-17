@@ -177,7 +177,8 @@ table.data tr.removed td { background: #FDECEC; color: #B6463A; text-decoration:
 }
 .chip:hover { border-color: var(--blue-d); }
 .chip.selected { border-color: var(--orange); background: var(--orange-l); }
-.chip.used { opacity: .45; }
+.chip.used { opacity: .65; }
+.chip.used .add { background: var(--ink-2); }
 .chip.dragging { opacity: .4; }
 .chip .grip { color: #B0B8BC; font-size: .9rem; touch-action: none; padding: .3rem .15rem; cursor: grab; }
 .drag-ghost { position: fixed; left: 0; top: 0; z-index: 100; pointer-events: none; box-shadow: 0 8px 24px rgba(0,0,0,.18); border-color: var(--orange); opacity: .95; }

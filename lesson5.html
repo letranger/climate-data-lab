@@ -3,18 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>第五課：獨立資料分析專題｜氣候資料實驗室</title>
+<title>第五課（其他國家）：獨立資料分析專題｜氣候資料實驗室</title>
 <link rel="icon" href="assets/logo-dayofai.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Rubik:wght@500;700&display=swap">
-<link rel="stylesheet" href="style.css?v=20261011171038">
+<link rel="stylesheet" href="style.css?v=20261017213000">
 </head>
 <body>
 
 <header class="topbar">
   <a class="brand" href="index.html">
     <img src="assets/logo-dayofai.png" alt="Day of AI" class="logo">
-    <div><div class="brand-title">氣候資料實驗室</div><div class="brand-sub">第五課：獨立資料分析專題</div></div>
+    <div><div class="brand-title">氣候資料實驗室</div><div class="brand-sub">第五課（其他國家）：獨立資料分析專題</div></div>
   </a>
   <nav class="lesson-nav" id="lessonNav" data-current="5"></nav>
   <div class="pills"><span class="pill" id="studentName"></span><span class="pill" id="datasetPill" hidden></span></div>
@@ -37,7 +37,7 @@
     <div id="countryLink" class="link-out"></div>
     <ul class="muted">
       <li>網址的格式是 <code>https://data.humdata.org/dataset/world-bank-climate-change-indicators-for-國名</code>，國名用世界銀行的英文寫法，全部小寫、空白換成連字號，例如 <code>japan</code>、<code>viet-nam</code>、<code>philippines</code>、<code>indonesia</code>；南韓是 <code>korea-rep</code>。</li>
-      <li>如果連結打不開，就到 <a href="https://data.humdata.org/" target="_blank" rel="noopener">HDX 首頁</a>搜尋「Climate Change Indicators」加國名，選 <b>World Bank Group</b> 提供的「<b>國名 - Climate Change</b>」那一筆（下圖以日本為例）。</li>
+      <li>如果連結打不開，就到 <a href="https://data.humdata.org/" target="_blank" rel="noopener">HDX 首頁</a>搜尋「Climate Change Indicators」加國名，<b>輸入完要按 Enter</b>（搜尋框下面跳出來的 Location、Organisation 建議不要點，那不是資料集），在結果頁選 <b>World Bank Group</b> 提供的「<b>國名 - Climate Change</b>」那一筆（下圖以日本為例）。</li>
       <li>進到國家的資料頁後，往下捲到 <b>Data and resources</b>，在 <b>Climate Change Indicators for 國名</b> 那一格按右下角藍色的 <b>Download</b>。檔名會像 <code>climate-change_abc.csv</code>，abc 是國家代碼。</li>
       <li>世界銀行的資料庫裡沒有台灣，想研究台灣的同學可以改選氣候條件相近的國家，例如日本、菲律賓。</li>
     </ul>
@@ -57,7 +57,7 @@
 <!-- ───────── 整理 ───────── -->
 <section class="panel" data-panel="2">
   <h1>把資料整理成資料表 <small>約 5 分鐘</small></h1>
-  <p class="lead">和第二課一樣：刪掉標籤列、刪掉用不到的欄位、重新排成「一年一列」，再把缺失 60% 以上的欄位刪掉。忘了為什麼要這樣做，可以回去看第二課。</p>
+  <p class="lead">和第二課一樣：刪掉用不到的欄位、重新排成「一年一列」，再把缺失 60% 以上的欄位刪掉。忘了為什麼要這樣做，可以回去看第二課。</p>
   <div id="reformat"></div>
   <h2>刪掉缺失 60% 以上的欄位</h2>
   <div id="missing"></div>
@@ -131,7 +131,7 @@
     <div id="notes"></div>
   </div>
   <div class="nav-row"><button class="btn ghost" data-goto="6">◀ 上一步</button><a class="btn next" href="index.html">回首頁</a></div>
-  <p class="muted tiny" style="text-align:right"><button class="btn small ghost" id="resetAll">清除第五課的進度，重新開始</button></p>
+  <p class="muted tiny" style="text-align:right"><button class="btn small ghost" id="resetAll">清除第五課（其他國家）的進度，重新開始</button></p>
 </section>
 
 </main>
@@ -144,12 +144,12 @@
 <div class="toast" id="toast"></div>
 
 <script src="lib/chart.umd.min.js?v=20261011171038"></script>
-<script src="data/indicators-zh.js?v=20261011171038"></script>
-<script src="js/core.js?v=20261011171038"></script>
-<script src="js/explore.js?v=20261011171038"></script>
-<script src="js/wide.js?v=20261011171038"></script>
-<script src="js/viz.js?v=20261011171038"></script>
-<script src="js/ml.js?v=20261011171038"></script>
+<script src="data/indicators-zh.js?v=20261017210000"></script>
+<script src="js/core.js?v=20261017210000"></script>
+<script src="js/explore.js?v=20261017210000"></script>
+<script src="js/wide.js?v=20261017210000"></script>
+<script src="js/viz.js?v=20261017213000"></script>
+<script src="js/ml.js?v=20261017210000"></script>
 <script src="js/lesson5.js?v=20261011171038"></script>
 </body>
 </html>

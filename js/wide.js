@@ -10,7 +10,7 @@ function load(text, name, { silent = false } = {}) {
   try { r = CDL.ingest(text, name); } catch (e) { toast(e.message, 5000); return false; }
   if (r.format !== "wide") { toast("這是從 HDX 下載的原始檔。這一課要上傳的是上一課整理好、存下來的 my_xxx_climate_data.csv。", 6500); return false; }
   if (!r.wide.cols.length) { toast("這個檔案裡沒有資料欄位。", 4000); return false; }
-  DS = r.wide; DS.country = r.country || "";
+  DS = r.wide; DS.country = r.country || ""; DS.freq = r.freq || "year";
   if (!silent) { S.fileName = name; S.csvText = text; toast(`已上傳 ${name}`); }
   return true;
 }
@@ -28,7 +28,7 @@ function mount(el, { lesson = 2 } = {}) {
   function render() {
     const v = $(".wide-view", el);
     if (!DS) { v.innerHTML = ""; return; }
-    v.innerHTML = `<div class="ok-box">✅ 已上傳 <code>${esc(S.fileName)}</code>：${DS.years.length} 年（${DS.years[0]}–${DS.years.at(-1)}）× ${DS.cols.length} 個欄位</div>
+    v.innerHTML = `<div class="ok-box">✅ 已上傳 <code>${esc(S.fileName)}</code>：${CDL.tCount(DS, DS.years.length)}（${CDL.tSpan(DS, DS.years[0], DS.years.at(-1))}）× ${DS.cols.length} 個欄位</div>
       <h3>你的資料表</h3>
       <div class="table-wrap small">${CDL.tableHTML(DS, DS.cols)}</div>
       <h3>你的三個欄位</h3>

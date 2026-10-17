@@ -83,11 +83,11 @@ ml = CDL.ModelBuilder($("#mlBuilder"), {
   ],
 });
 
-CDL.Notes($("#notes"), { S, save, onInput: () => nav && nav.refresh(), title: "我的發現", fileName: "第五課筆記.txt", placeholder: "例如：根據日本 1990–2020 年的資料，核能發電占比在 2011 年後……" });
+CDL.Notes($("#notes"), { S, save, onInput: () => nav && nav.refresh(), title: "我的發現", fileName: "第五課（其他國家）筆記.txt", placeholder: "例如：根據日本 1990–2020 年的資料，核能發電占比在 2011 年後……" });
 $("#dlClean").addEventListener("click", () => { const c = X.clean(); if (!c) { toast("請先完成清理資料。"); return; } CDL.download(X.saveName(), CDL.wideCSV(c)); });
 
 $("#resetAll").addEventListener("click", () => {
-  if (!window.confirm("確定要清除第五課的所有進度嗎？")) return;
+  if (!window.confirm("確定要清除第五課（其他國家）的所有進度嗎？")) return;
   store.clear(); location.reload();
 });
 

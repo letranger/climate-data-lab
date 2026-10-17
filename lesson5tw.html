@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第五課（臺灣資料）：獨立資料分析專題｜氣候資料實驗室</title>
+<link rel="icon" href="assets/logo-dayofai.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Rubik:wght@500;700&display=swap">
+<link rel="stylesheet" href="style.css?v=20261017213000">
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="index.html">
+    <img src="assets/logo-dayofai.png" alt="Day of AI" class="logo">
+    <div><div class="brand-title">氣候資料實驗室</div><div class="brand-sub">第五課（臺灣資料）：獨立資料分析專題</div></div>
+  </a>
+  <nav class="lesson-nav" id="lessonNav" data-current="5tw"></nav>
+  <div class="pills"><span class="pill" id="studentName"></span><span class="pill" id="datasetPill" hidden></span></div>
+</header>
+<nav class="pipeline" id="pipeline"></nav>
+
+<main>
+<!-- ───────── 下載資料 ───────── -->
+<section class="panel" data-panel="1">
+  <h1>用臺灣自己的資料做專題 <small>約 5 分鐘</small></h1>
+  <p class="lead">這一課你要探索<b>臺灣的資料</b>，做的事和前幾課一樣，只是提示比較少。卡住的時候，回去看第二～四課，通常就能找到下一步的線索。</p>
+  <p>前三課用的世界銀行資料庫裡沒有臺灣。所以我們到中央氣象署、農業部、經濟部能源署、台灣電力公司、環境部等機關的開放資料，把 1980 年到 2025 年的臺灣資料整理成<b>和世界銀行檔案一樣的格式</b>：一列一筆數字，欄位是國家、年份、指標名稱、數值。</p>
+  <div class="card">
+    <h3>下載臺灣的資料</h3>
+    <p>有兩份檔案，選一份按下載存到電腦，再拖到下方上傳。和第二課一樣，資料要你自己「拿進來」，網站不會自動幫你讀。</p>
+    <div class="toolbar">
+      <a class="btn primary" href="data/climate-change_twn.csv" download="climate-change_twn.csv">下載 climate-change_twn.csv（年資料，1980–2025）</a>
+      <a class="btn primary" href="data/climate-change_twn_monthly.csv" download="climate-change_twn_monthly.csv">下載 climate-change_twn_monthly.csv（逐月資料，1998–2025）</a>
+    </div>
+    <ul class="muted">
+      <li><b>年資料</b>有八十多個欄位：氣溫、雨量、高溫日數、颱風數、發電與各種能源的占比、用電量、二氧化碳與溫室氣體排放、人口、農地與林地面積、稻米與蔬菜產量、高麗菜等蔬菜的價格、漁獲、海平面……一列是「某一年的某一個數字」，和其他國家的檔案一模一樣。</li>
+      <li><b>逐月資料</b>比較少欄位（氣溫、雨量、颱風數、蔬菜產地價、批發價與交易量、潮位、太陽光電、熱傷害），但一列是「某一個月的某一個數字」，多了一個 Month 欄。想看「颱風來的那個月和隔月，菜價怎麼跳」就要用這份。上傳後網站會自動切成逐月模式，後面每一步都一樣，只是「一年一列」變成「一個月一列」。</li>
+      <li>有些欄位只有 2005 年以後才有資料，整理資料時會被「缺失 60% 以上」的規則刪掉，這和其他國家的檔案一樣，是正常的。</li>
+      <li>每個數字都查得到來源：<a href="data/SOURCES-taiwan.md" target="_blank" rel="noopener">來源說明（SOURCES-taiwan.md）</a> 列出每個欄位來自哪個機關、哪個檔案、怎麼算的。寫報告引用資料時可以用。</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>可以玩什麼？幾個起點</h3>
+    <p class="muted">這些只是起點，不一定有「對」的答案。你也可以完全不理這張表，自己找三個有興趣的欄位。</p>
+    <ul>
+      <li><b>颱風與菜價</b>：侵臺颱風多的年份，高麗菜 8–10 月的產地價格有比較高嗎？和「颱風季降雨量」比起來，哪個更能解釋菜價？用逐月資料看：颱風來的那個月，菜價是當月就漲還是隔月才漲？幾個月後回到原來的價格？</li>
+      <li><b>高溫與用電</b>：日最高溫 ≥35°C 的日數變多了嗎？它和年尖峰負載、總用電量有關係嗎？熱傷害急診人次呢？</li>
+      <li><b>能源轉型與排碳</b>：核能、燃煤、天然氣、太陽光電與風力的發電占比這四十年怎麼變？電力排碳係數跟著變了嗎？</li>
+      <li><b>雨量與農業</b>：年雨量少的年份，農業用水量、稻米產量有什麼變化？2021 年的大旱看得出來嗎？</li>
+      <li><b>暖化與作物</b>：年平均氣溫上升，芒果、茶葉、稻米的產量跟著變嗎？還是其他因素（農地面積、人口）影響更大？</li>
+      <li><b>海平面</b>：基隆、高雄的年平均潮位有上升趨勢嗎？二十年的資料夠不夠下結論？</li>
+    </ul>
+  </div>
+  <h2>上傳臺灣的 CSV</h2>
+  <div id="upload"></div>
+  <div class="stop" data-slides="P82" data-ws="作業10"><ul><li>看了上面的欄位清單，你最想研究臺灣的什麼問題？為什麼？你選年資料還是逐月資料？寫在學習單上。</li></ul></div>
+  <div class="nav-row"><span></span><button class="btn next" data-goto="2">下一步：整理資料 ▶</button></div>
+</section>
+
+<!-- ───────── 整理 ───────── -->
+<section class="panel" data-panel="2">
+  <h1>把資料整理成資料表 <small>約 5 分鐘</small></h1>
+  <p class="lead">和第二課一樣：刪掉標籤列和用不到的欄位、重新排成「一年一列」，再把缺失 60% 以上的欄位刪掉。忘了為什麼要這樣做，可以回去看第二課。</p>
+  <div id="reformat"></div>
+  <h2>刪掉缺失 60% 以上的欄位</h2>
+  <p class="muted">年資料被刪掉的多半是 2011 年以後才開始統計的項目（例如批發菜價、熱傷害）；想研究它們的話，逐月檔從 1998 年起算，它們就留得住。</p>
+  <div id="missing"></div>
+  <div class="nav-row"><button class="btn ghost" data-goto="1">◀ 上一步</button><button class="btn next" data-goto="3">下一步：選欄位 ▶</button></div>
+</section>
+
+<!-- ───────── 選欄位 ───────── -->
+<section class="panel" data-panel="3">
+  <h1>選出三個有趣的欄位 <small>約 15 分鐘</small></h1>
+  <p class="lead">先列出所有欄位，點進去看看資料（也可以只看某幾年），挑一個最有興趣的當「欄位 1」。接著再挑兩個：可以直接挑你有感覺的，也可以像第二課一樣看相關係數。</p>
+  <p class="muted">記得：有些欄位和你的欄位高度相關，只是因為它們量的是同一件或很像的事（例如「六站平均年均溫」和「臺北年均溫」、「核能發電占比」和「電力排碳係數」）。盡量挑量的是<b>不同</b>東西、但彼此相關的欄位。</p>
+  <div id="pick"></div>
+  <h2>你選的三個欄位</h2>
+  <div class="interest-print"></div>
+  <div class="stop" data-slides="P83" data-ws="作業10"><ul><li>你選了哪三個欄位？為什麼？寫在學習單上。</li></ul></div>
+  <div class="nav-row"><button class="btn ghost" data-goto="2">◀ 上一步</button><button class="btn next" data-goto="4">下一步：清理資料框 ▶</button></div>
+</section>
+
+<!-- ───────── 清理 ───────── -->
+<section class="panel" data-panel="4">
+  <h1>清理你的資料 <small>約 10 分鐘</small></h1>
+  <p class="lead">只留下你選的三個欄位，再刪掉任何有空白的年份。步驟和第二課一樣。</p>
+  <div id="clean"></div>
+  <div class="stop" data-slides="P84–P85" data-ws="作業10">
+    <ul>
+      <li>你有興趣研究臺灣的什麼？你為什麼選這些資料欄位？</li>
+      <li>你認為可能會發現什麼？</li>
+      <li>這些欄位是怎麼量出來的？（例如「六站平均」代表全臺灣嗎？颱風數是誰算的？）</li>
+    </ul>
+  </div>
+  <div class="nav-row"><button class="btn ghost" data-goto="3">◀ 上一步</button><button class="btn next" data-goto="5">下一步：自由探索 ▶</button></div>
+</section>
+
+<!-- ───────── 自由探索 ───────── -->
+<section class="panel" data-panel="5">
+  <h1>自由探索 <small>約 20 分鐘</small></h1>
+  <p class="lead">先看看你整理好的整個資料框，也可以只看某些欄位、某幾年（第二課教過的方法）。然後用第三課學到的折線圖、散布圖，試試不同的顏色和圖表類型，找出最能呈現你感興趣的資料的畫法。</p>
+  <div id="viewer" class="card"></div>
+  <h2>畫圖</h2>
+  <div id="vizBuilder"></div>
+  <div class="stop" data-slides="P86" data-ws="作業11"><ul><li>在資料框中查看你的資料，把資料畫成折線圖和散布圖。你看到了什麼？記在學習單上。</li></ul></div>
+  <div class="nav-row"><button class="btn ghost" data-goto="4">◀ 上一步</button><button class="btn next" data-goto="6">下一步：延伸：預測模型 ▶</button></div>
+</section>
+
+<!-- ───────── 延伸：預測 ───────── -->
+<section class="panel" data-panel="6">
+  <h1>延伸：預測模型 <small>約 15 分鐘</small></h1>
+  <p class="lead">想要的話，可以拿預測模型來試試看；如果你比較想把時間花在做要分享的圖表，也可以跳過這一步。</p>
+  <p>先替你的三個欄位都做<b>線性迴歸</b>，再做<b>支援向量迴歸</b>，做法和第四課一樣。別忘了 SVR 要先標準化，預測完再換回原本的單位（這裡會自動幫你做）。</p>
+  <div id="mlBuilder"></div>
+  <div class="stop" data-slides="P87"><ul><li>評估你的迴歸模型：它們有好好代表你的資料嗎？你猜為什麼有、或為什麼沒有？</li><li>颱風數、菜價這種一年一年跳動很大的資料，用「趨勢線」預測合理嗎？</li></ul></div>
+  <div class="nav-row"><button class="btn ghost" data-goto="5">◀ 上一步</button><button class="btn next" data-goto="7">下一步：分享探索成果 ▶</button></div>
+</section>
+
+<!-- ───────── 分享 ───────── -->
+<section class="panel" data-panel="7">
+  <h1>分享你的探索成果 <small>約 10 分鐘</small></h1>
+  <p class="lead">做得好！找一位同學，分享你對資料的初步想法和問題。第六課要用這些成果來說故事，記得把整理好的資料、圖表和筆記存下來。</p>
+  <div class="stop" data-slides="P88" data-ws="作業11">
+    <ul>
+      <li>你探索的資料中，有沒有令人困惑或出乎意料的地方？</li>
+      <li>你的探索結果符合你原本的假設嗎（如果有的話）？</li>
+      <li>有沒有發現什麼有趣、但很難解釋的模式？</li>
+      <li>這些資料是誰蒐集的、怎麼量的？你信任它們嗎？（看看<a href="data/SOURCES-taiwan.md" target="_blank" rel="noopener">來源說明</a>）</li>
+      <li>資料的哪個部分最讓你想繼續探索？</li>
+    </ul>
+  </div>
+  <div class="takeaway-grid">
+    <div class="card"><h3>📄 整理好的資料</h3><p>第六課可以再用，也可以用 Excel 打開。</p><button class="btn primary" id="dlClean">下載 CSV</button></div>
+    <div class="card"><h3>📈 我的圖表</h3><p>在「自由探索」「延伸：預測」的每張圖下方按「存成圖片」，就能貼進簡報或影片。</p></div>
+    <div id="notes"></div>
+  </div>
+  <div class="nav-row"><button class="btn ghost" data-goto="6">◀ 上一步</button><a class="btn next" href="index.html">回首頁</a></div>
+  <p class="muted tiny" style="text-align:right"><button class="btn small ghost" id="resetAll">清除第五課（臺灣資料）的進度，重新開始</button></p>
+</section>
+</main>
+
+<footer class="footer">
+  本工具改編自麻省理工學院 Day of AI™「Telling Climate Stories with Data」的資料分析活動，依
+  <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a> 授權。
+  <a href="https://www.dayofai.org/privacy-and-terms-of-use" target="_blank" rel="noopener">使用條款</a>｜臺灣資料來源：中央氣象署、農業部、經濟部能源署、台灣電力公司、環境部、水利署、衛福部國健署、Our World in Data、FAOSTAT、維基百科（詳見 <a href="data/SOURCES-taiwan.md" target="_blank" rel="noopener">SOURCES-taiwan.md</a>）。所有運算都在你的瀏覽器中進行。
+</footer>
+<div class="toast" id="toast"></div>
+
+<script src="lib/chart.umd.min.js?v=20261011171038"></script>
+<script src="data/indicators-zh.js?v=20261017210000"></script>
+<script src="js/core.js?v=20261017210000"></script>
+<script src="js/explore.js?v=20261017210000"></script>
+<script src="js/wide.js?v=20261017210000"></script>
+<script src="js/viz.js?v=20261017213000"></script>
+<script src="js/ml.js?v=20261017210000"></script>
+<script src="js/lesson5tw.js?v=20261017210000"></script>
+</body>
+</html>

@@ -2,7 +2,7 @@
    五種背景（同 seaborn 的 darkgrid／whitegrid／dark／white／ticks）、換顏色、標題與軸名稱。
    每畫一張圖，就把「做了哪一種圖」記進 done，讓任務清單自動打勾。 */
 CDL.ChartBuilder = function (el, { id, store, getData, types = ["line", "scatter"], xcol = false, custom = true, tasks = [], done = {}, save = () => {}, onDraw = () => {} }) {
-const { $, $$, esc, zh, isNum, fmtPlain, toast } = CDL;
+const { $, $$, esc, zh, isNum, fmtPlain, toast, tLabel, tX } = CDL;
 Object.assign(store, Object.assign({ type: types[0], ys: [], colors: {}, norm: false, theme: "darkgrid", title: "", xlabel: "年份", ylabel: "", x: "Year", trend: false }, store));
 if (!types.includes(store.type)) store.type = types[0];
 const cv = `cv_${id}`;
@@ -11,7 +11,7 @@ const THEME_ZH = { darkgrid: "灰底＋白格線（預設）", whitegrid: "白�
 
 el.innerHTML = `<div class="builder">
   <div class="builder-side">
-    <div class="mini-title">你的欄位（拖到右邊的 Y 軸，或按「畫它」）</div>
+    <div class="mini-title">你的欄位（拖到右邊的 Y 軸，或按「畫它」；灰色＝已經在圖上，按「拿掉」移出）</div>
     <div class="chip-list cols"></div>
     <div class="task-box"></div>
   </div>
@@ -49,7 +49,7 @@ function persist() { save(); }
 function maxY() { return store.x === "Year" ? 3 : 1; }
 function addY(col) {
   if (col === store.x) { toast("這個欄位已經放在 X 軸了"); return; }
-  if (store.ys.includes(col)) return;
+  if (store.ys.includes(col)) { store.ys = store.ys.filter(c => c !== col); toast(`已把「${zh(col)}」從 Y 軸拿掉`); persist(); render(); return; }   // 再按一次＝拿掉
   if (store.ys.length >= maxY()) { if (maxY() === 1) store.ys = [col]; else { toast("最多放 3 個欄位"); return; } }
   else store.ys.push(col);
   persist(); render();
@@ -69,7 +69,7 @@ function render() {
   if (!d) { box.innerHTML = '<div class="muted">還沒有資料。</div>'; draw(); return; }
   store.ys = store.ys.filter(c => d.cols.includes(c));
   if (store.x !== "Year" && !d.cols.includes(store.x)) store.x = "Year";
-  d.cols.forEach(c => box.appendChild(CDL.makeChip(c, { used: store.ys.includes(c), addLabel: "畫它", onAdd: addY })));
+  d.cols.forEach(c => box.appendChild(CDL.makeChip(c, { used: store.ys.includes(c), addLabel: store.ys.includes(c) ? "拿掉" : "畫它", onAdd: addY })));
   if (xcol) {
     const xs = $(".xsel", el);
     xs.innerHTML = `<option value="Year">年份（原課程的做法）</option>` + d.cols.map(c => `<option value="${esc(c)}">${esc(zh(c))}（延伸）</option>`).join("");
@@ -109,7 +109,9 @@ function norm(d, c) {
 function draw() {
   const d = getData(), hint = $(".hint", el);
   const theme = custom ? store.theme : "darkgrid";
-  const opts = CDL.baseOpts({ title: store.title.trim(), xTitle: store.xlabel.trim(), yTitle: store.ylabel.trim(), theme, legend: store.ys.length > 1 || store.norm });
+  const mon = CDL.monthly(d);
+  const xlabel = store.xlabel.trim() === "年份" && mon ? "年月" : store.xlabel.trim();
+  const opts = CDL.baseOpts({ title: store.title.trim(), xTitle: xlabel, yTitle: store.ylabel.trim(), theme, legend: store.ys.length > 1 || store.norm, timeX: store.x === "Year" ? mon : null });
   if (!d || !store.ys.length) {
     CDL.drawChart(cv, { type: "scatter", data: { datasets: [] }, options: opts });
     hint.innerHTML = "把一個欄位拖到 Y 軸（或按欄位旁的「畫它」），就會畫出圖。";
@@ -123,7 +125,7 @@ function draw() {
       return {
         type: isLine ? "line" : "scatter",
         label: (store.norm ? "正規化 " : "") + zh(c),
-        data: d.years.filter(y => isNum(d.data[c][y])).map(y => ({ x: y, y: f(d.data[c][y]), raw: d.data[c][y] })),
+        data: d.years.filter(y => isNum(d.data[c][y])).map(y => ({ x: tX(y), y: f(d.data[c][y]), raw: d.data[c][y], t: y })),
         borderColor: colorOf(c), backgroundColor: colorOf(c), showLine: isLine, borderWidth: isLine ? 2.2 : 0, pointRadius: isLine ? 0 : 5, pointHoverRadius: 6, tension: 0,
       };
     });
@@ -140,8 +142,8 @@ function draw() {
   opts.interaction = isLine ? { mode: "nearest", intersect: false } : { mode: "nearest", intersect: true };
   opts.plugins.tooltip.callbacks.label = ctx => {
     const r = ctx.raw;
-    if (r.year) return `${r.year} 年：X＝${fmtPlain(r.x)}，Y＝${fmtPlain(r.y)}`;
-    return `${ctx.dataset.label}｜${r.x}：${fmtPlain(r.raw ?? r.y)}${store.norm && isNum(r.raw) ? `（正規化後 ${r.y.toFixed(3)}）` : ""}`;
+    if (r.year) return `${tLabel(r.year)}${CDL.isMonthKey(r.year) ? "" : " 年"}：X＝${fmtPlain(r.x)}，Y＝${fmtPlain(r.y)}`;
+    return `${ctx.dataset.label}｜${tLabel(r.t)}：${fmtPlain(r.raw ?? r.y)}${store.norm && isNum(r.raw) ? `（正規化後 ${r.y.toFixed(3)}）` : ""}`;
   };
   if (store.norm) { opts.scales.y.min = -0.05; opts.scales.y.max = 1.05; opts.scales.y.ticks.callback = v => v.toFixed(1); }
   CDL.drawChart(cv, { type: "scatter", data: { datasets }, options: opts });
@@ -150,7 +152,7 @@ function draw() {
   const mags = store.ys.map(c => Math.max(...d.years.map(y => Math.abs(d.data[c][y])).filter(isNum)));
   if (store.x === "Year" && !store.norm && store.ys.length > 1 && Math.max(...mags) / Math.max(1e-9, Math.min(...mags)) > 5)
     hint.innerHTML = "💡 這幾個欄位的數字大小差很多，數字小的那條線幾乎被壓成一直線，看不出它的變化。試試勾選<b>正規化</b>。";
-  else if (store.norm) hint.innerHTML = "正規化（min-max）：每一欄都換成 (數值 − 最小值) ÷ (最大值 − 最小值)，最小的一年變 0、最大的一年變 1。數字變了，但每一年是升是降的關係沒變。";
+  else if (store.norm) hint.innerHTML = `正規化（min-max）：每一欄都換成 (數值 − 最小值) ÷ (最大值 − 最小值)，最小的那${mon ? "個月" : "一年"}變 0、最大的變 1。數字變了，但每一${mon ? "個月" : "年"}是升是降的關係沒變。`;
   else hint.textContent = "";
 
   // 記錄做過哪些圖
