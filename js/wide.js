@@ -45,7 +45,7 @@ CDL.Notes = function (el, { S, save, title = "我的筆記", fileName = "我的�
   const { $ } = CDL;
   el.innerHTML = `<div class="card"><h3>📝 ${CDL.esc(title)}</h3>
     <textarea class="notes-ta" rows="8" placeholder="${CDL.esc(placeholder)}"></textarea>
-    <div class="notes-foot"><button class="btn small dln">下載筆記</button> <span class="muted tiny">筆記只存在這台電腦的瀏覽器裡。</span></div></div>`;
+    <div class="notes-foot"><button class="btn small dln">下載筆記</button></div></div>`;
   const ta = $("textarea", el);
   ta.value = S.notes || "";
   ta.addEventListener("input", () => { S.notes = ta.value; save(); onInput(); });
