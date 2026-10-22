@@ -139,10 +139,10 @@ table.data tr.removed td { background: #FDECEC; color: #B6463A; text-decoration:
   border-radius: var(--radius); padding: .9rem 1.1rem; margin: 1.4rem 0;
 }
 .stop::before {
-  content: ""; flex: 0 0 48px; height: 48px; background: url(assets/stop-sign.png) center/contain no-repeat;
+  content: ""; flex: 0 0 72px; height: 72px; background: url(assets/stop-sign.png) center/contain no-repeat;
 }
 .stop.compact { margin: .8rem 0; padding: .6rem .9rem; }
-.stop.compact::before { flex-basis: 34px; height: 34px; }
+.stop.compact::before { flex-basis: 72px; height: 72px; }
 .stop ul { margin: 0; padding-left: 1.2rem; }
 .stop .stop-meta { font-size: .8rem; color: var(--ink-2); margin-bottom: .2rem; }
 .stop .stop-meta b { color: #E53935; }
