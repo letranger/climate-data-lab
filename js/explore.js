@@ -108,7 +108,7 @@ function mountReformat(el) {
 // ───────── 刪除缺失 ≥ 60% 的欄位 ─────────
 function mountMissing(el, { slider = true } = {}) {
   // 原課程固定刪掉缺失 ≥ 60% 的欄位；換門檻放在「延伸」裡，預設收起來
-  el.innerHTML = `<div class="miss-head"><span class="tbd" title="待小組討論後決定">待討論</span></div>
+  el.innerHTML = `<div class="miss-head"></div>
     <div class="toolbar">
       <span>刪除缺失比例 ≥ <b class="thrv"></b> 的欄位<span class="muted tiny thrnote"></span></span>
       <button class="btn primary do"></button><button class="btn ghost undo">復原</button>

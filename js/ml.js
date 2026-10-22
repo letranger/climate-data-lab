@@ -25,9 +25,8 @@ el.innerHTML = `<div class="builder">
     <div class="chart-actions"><button class="btn small dlimg">⬇ 存成圖片</button></div>
     <div class="model-info"></div>
     <div class="tryit card"></div>
-    ${extension ? `<details class="howto ext"><summary>🧪 延伸挑戰（原課程沒有，學有餘力再玩）<span class="tbd" title="待小組討論後決定">待討論</span></summary>
+    ${extension ? `<details class="howto ext"><summary>🧪 延伸挑戰（原課程沒有，學有餘力再玩）</summary>
       <div class="ext-body">
-        <p class="tbd-note"><span class="tbd" title="待小組討論後決定">待討論</span>原課程只用 <b>SVR() 的預設值</b>（γ=1、C=1、ε=0.1），Notebook、教師指南、投影片都沒有讓學生調參數；投影片 P71–P73 只用文字說明「貼太緊會過度擬合」和「泛化能力」。這一區的調參數滑桿、考試模式、預測超過 5 年，都是網頁版自己加的，用意是讓學生親手看到過度擬合。要不要保留，待小組決定。</p>
         <div class="svr-only">
           <div class="slider-row"><span title="gamma：曲線可以彎得多細">彎曲程度 γ</span><input type="range" class="g" min="-2" max="2" step="0.1"><b class="gv"></b></div>
           <div class="slider-row"><span title="C：多努力去貼近每一個點">貼合力道 C</span><input type="range" class="c" min="-1" max="3" step="0.1"><b class="cv"></b></div>

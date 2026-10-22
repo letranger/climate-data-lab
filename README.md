@@ -124,7 +124,6 @@ assets/                 Day of AI 標誌、STOP 標誌、Notebook 截圖
 - **小改文字**：在 GitHub 網頁上打開檔案，按鉛筆圖示直接編輯、Commit 即可。學生看到的文字大多在 `lesson2.html`～`lesson5.html`；整理資料、選欄位、畫圖、預測這些共用元件的文字在 `js/explore.js`、`js/viz.js`、`js/ml.js`。
 - **在自己電腦上改**：`git clone` 下來，雙擊 `index.html` 就能測試，改好再 `git push`。
 - **改了 js 或 css 之後**：把各 html 裡 `?v=` 後面的數字改大（例如改成當天日期時間），學生的瀏覽器才會讀到新版，不會卡在舊的快取。
-- **「待討論」標籤**：網頁上黃色虛線的「待討論」是還沒定案、要小組決定的地方。決定後，把該處的 `<span class="tbd" …>待討論</span>`（以及旁邊說明用的 `tbd-note`）刪掉即可。
 
 ## 授權
 

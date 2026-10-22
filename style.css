@@ -390,15 +390,10 @@ table.mini th { background: #F1F4F5; text-align: left; font-weight: 500; }
 }
 #foodTable { max-height: 560px; }
 
-/* 待討論標記：給老師小組討論用，定案後拿掉 */
-.tbd { display: inline-block; vertical-align: middle; margin-left: .4rem; padding: .1rem .6rem; border-radius: 999px; background: #FFE14D; color: #7A4B00; border: 2px dashed #E0A800; font: 700 .85rem var(--font); letter-spacing: .05em; }
-.shot-tbd { margin: .8rem 0 -.4rem; }
-.shot-tbd .tbd { margin-left: 0; }
 .miss-row .cov { font-size: .82rem; font-variant-numeric: tabular-nums; text-align: right; }
 .miss-row .cov small { display: block; color: var(--ink-2); font-size: .72rem; }
 .miss-summary { margin: .6rem 0 .8rem; font-size: .92rem; }
 .miss-head { margin-bottom: .2rem; }
-.miss-head .tbd { margin-left: 0; }
 @media (max-width: 860px) { .miss-row { grid-template-columns: 1fr 1fr 3.4rem; } .miss-row .cov { grid-column: 1 / -1; text-align: left; } }
 .pick-howto { background: var(--blue-l); border-left: 5px solid var(--blue-d); border-radius: 8px; padding: .6rem 1rem; margin: .4rem 0 .9rem; font-size: .95rem; }
 .pick-howto.ok { background: #EAF8F4; border-left-color: var(--teal); }
@@ -407,7 +402,4 @@ table.mini th { background: #F1F4F5; text-align: left; font-weight: 500; }
 .chip:not(.selected) { cursor: pointer; }
 .slot.filled { cursor: pointer; }
 .pick-left .chip { cursor: pointer; }
-.tbd-note { background: #FFFBE6; border: 1.5px dashed #E0A800; border-radius: 8px; padding: .45rem .7rem; margin: .2rem 0 .5rem; font-size: .88rem; color: var(--ink); }
-.tbd-note .tbd { margin: 0 .4rem 0 0; }
-.ext > summary .tbd { margin-left: .6rem; }
 .shot-cap { margin: -.4rem 0 1rem; }
