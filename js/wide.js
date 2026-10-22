@@ -44,8 +44,8 @@ return { mount, data: () => DS, loaded: () => !!DS, colLabel: (c, i) => `欄位 
 CDL.Notes = function (el, { S, save, title = "我的筆記", fileName = "我的筆記.txt", placeholder = "", onInput = () => {} }) {
   const { $ } = CDL;
   el.innerHTML = `<div class="card"><h3>📝 ${CDL.esc(title)}</h3>
-    <textarea rows="7" placeholder="${CDL.esc(placeholder)}"></textarea>
-    <button class="btn small dln">下載筆記</button> <span class="muted tiny">筆記只存在這台電腦的瀏覽器裡。</span></div>`;
+    <textarea class="notes-ta" rows="8" placeholder="${CDL.esc(placeholder)}"></textarea>
+    <div class="notes-foot"><button class="btn small dln">下載筆記</button> <span class="muted tiny">筆記只存在這台電腦的瀏覽器裡。</span></div></div>`;
   const ta = $("textarea", el);
   ta.value = S.notes || "";
   ta.addEventListener("input", () => { S.notes = ta.value; save(); onInput(); });
